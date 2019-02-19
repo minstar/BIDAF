@@ -10,9 +10,9 @@ Multi-Sentence Reading Comprehension dataset (Multi-RC)
 3. Questions aren't constrained in single correct answer.
 
 # Version Type
-tensorflow == 1.9.0
-python == 3.6.0
+1. tensorflow == 1.9.0
+2. python == 3.6.0
 
 # Reference
-Model - https://arxiv.org/pdf/1611.01603.pdf
-Dataset - http://www.aclweb.org/anthology/N18-1023
+* Model - https://arxiv.org/pdf/1611.01603.pdf
+* Dataset - http://www.aclweb.org/anthology/N18-1023
