@@ -45,9 +45,9 @@ def clean_str(text):
     text = re.sub(r'\'', ' \' ', text)
     text = re.sub(r'\;', ' ;', text)
     text = re.sub('n\'t', ' n\'t ', text)
-    text = re.sub(r'[', '[ ', text)
-    text = re.sub(r']', ' ]', text)
-    text = re.sub(r'!', ' !', text)
+    text = re.sub(r'\[', '[ ', text)
+    text = re.sub(r'\]', ' ]', text)
+    text = re.sub(r'\!', ' !', text)
     return text
 
 def make_data():
@@ -117,7 +117,7 @@ def make_glove():
 
 def pickle_dump(glove_vocab=None):
     if glove_vocab is None:
-        print ('Loading pickle to dictionary')
+        print ('Loading Glove pickle to dictionary')
         with open(FLAGS.glove_dir + FLAGS.glove_load, 'rb') as f:
             glove_vocab = pickle.load(f)
         return glove_vocab
@@ -152,9 +152,12 @@ def vocab_data(preprocess_data):
     sentence_char = dict()
     query_word = dict()
     query_char = dict()
+    answer_text = dict()
+    answer_text_char = dict()
 
     # word max length
     word_maxlen = 0
+    answer_maxnum = 0
 
     for idx in range(len(preprocess_data)):
         paragraph = preprocess_data[idx]['paragraph']
@@ -164,6 +167,8 @@ def vocab_data(preprocess_data):
         queries = preprocess_data[idx]['questions']
         query_word[idx] = list()
         query_char[idx] = list()
+        answer_text[idx] = dict()
+        answer_text_char[idx] = dict()
 
         # paragraph preprocessing
         for sent_idx, sentence in enumerate(paragraph):
@@ -185,8 +190,12 @@ def vocab_data(preprocess_data):
         for query_idx in queries:
             query_word_list = list()
             query_char_list = list()
+            answer_text[idx][query_idx] = dict()
+            answer_text_char[idx][query_idx] = dict()
+
             query_dict = queries[query_idx]
             query_parsed = clean_str(query_dict['query'])
+            answer_list = queries[query_idx]['answers']
 
             for word in query_parsed.split():
                 # word token into dictionary
@@ -203,7 +212,48 @@ def vocab_data(preprocess_data):
             query_word[idx].append(query_word_list)
             query_char[idx].append(query_char_list)
 
-    return sentence_word, sentence_char, query_word, query_char, word_vocab, char_vocab, word_maxlen
+            # Answer preprocessing
+            for answer_idx, answer in enumerate(answer_list):
+                answer_text[idx][query_idx][answer_idx] = list()
+                answer_text_char[idx][query_idx][answer_idx] = list()
+                answer_parsed = clean_str(answer['text'])
+
+                for word in answer_parsed.split():
+                    # word token into dictionary
+                    answer_text[idx][query_idx][answer_idx].append(word_vocab.new_token(word))
+
+                    # character token into dictionary
+                    answer_text_char[idx][query_idx][answer_idx].append([char_vocab.new_token(c) for c in word])
+
+                    if len(word) > word_maxlen:
+                        word_maxlen = len(word)
+
+            if len(answer_list) + 1 > answer_maxnum:
+                answer_maxnum = len(answer_list) + 1
+
+    return sentence_word, sentence_char, query_word, query_char, answer_text, answer_text_char, \
+            word_vocab, char_vocab, word_maxlen, answer_maxnum
+
+def make_answer_dict(preprocess_data, answer_text, answer_text_char):
+
+    answer_text_presence = dict()
+
+    for idx in preprocess_data:
+        answer_text_presence[idx] = dict()
+        queries = preprocess_data[idx]['questions']
+
+        for query_idx in queries:
+            answer_text_presence[idx][query_idx] = dict()
+            # answer list with (text, isAnswer, scores)
+            answers = queries[query_idx]['answers']
+
+            for answer_idx, answer in enumerate(answers):
+                answer_text_presence[idx][query_idx][answer_idx] = dict()
+                answer_text_presence[idx][query_idx][answer_idx]['isAnswer'] = 1.0 if answer['isAnswer'] else 0.0
+                answer_text_presence[idx][query_idx][answer_idx]['text'] = answer_text[idx][query_idx][answer_idx]
+                answer_text_presence[idx][query_idx][answer_idx]['char_text'] = answer_text_char[idx][query_idx][answer_idx]
+
+    return answer_text_presence
 
 def glove_idx2vec(word_vocab, glove_vocab):
     word_idx2vec = dict()
@@ -214,3 +264,104 @@ def glove_idx2vec(word_vocab, glove_vocab):
         except KeyError as e:
             word_idx2vec[word] = np.zeros((300), dtype=np.float64)
     return word_idx2vec
+
+def embedding_matrix(sentence_word, sentence_char, answer_text_presence, query_word, query_char, word_maxlen):
+    sentence_maxlen = 92
+
+    word_matrix = dict()
+    query_matrix = dict()
+    char_matrix = dict()
+    answer_matrix = dict()
+    char_answer_matrix = dict()
+
+    query_matrix['word'] = dict()
+    query_matrix['char'] = dict()
+
+    for sent_idx in sentence_word:
+        # paragraph word token
+        word_matrix[sent_idx] = np.array(sentence_word[sent_idx], dtype=np.float32)
+
+        # query word token
+        query_matrix['word'][sent_idx] = dict()
+        for query_idx, query in enumerate(query_word[sent_idx]):
+            query_matrix['word'][sent_idx][query_idx] = np.array(query_word[sent_idx][query_idx], dtype=np.float32)
+
+        # paragraph character token
+        char_matrix[sent_idx] = np.zeros([len(sentence_char[sent_idx]), word_maxlen], dtype=np.float32)
+        for word_idx, char_list in enumerate(sentence_char[sent_idx]):
+            char_matrix[sent_idx][word_idx, :len(char_list)] = char_list
+
+        # query character token
+        query_matrix['char'][sent_idx] = dict()
+        for query_idx, query in enumerate(query_char[sent_idx]):
+            query_matrix['char'][sent_idx][query_idx] = np.zeros([len(query_char[sent_idx][query_idx]), word_maxlen], dtype=np.float32)
+            for word_idx, char_list in enumerate(query_char[sent_idx][query_idx]):
+                query_matrix['char'][sent_idx][query_idx][word_idx, :len(char_list)] = char_list
+
+        # answer word token
+        answer_matrix[sent_idx] = dict()
+        for query_idx in answer_text_presence[sent_idx]:
+            # answer text max length = 92
+            answer_matrix[sent_idx][query_idx] = dict()
+            answer_matrix[sent_idx][query_idx]['isAnswer'] = np.zeros([len(answer_text_presence[sent_idx][query_idx]), 2], \
+                                                                     dtype=np.float32)
+            answer_matrix[sent_idx][query_idx]['text'] = np.zeros([len(answer_text_presence[sent_idx][query_idx]), sentence_maxlen], \
+                                                                  dtype=np.int32)
+
+            for query_by_answer_idx in answer_text_presence[sent_idx][query_idx]:
+                query_ans_text = answer_text_presence[sent_idx][query_idx][query_by_answer_idx]['text']
+                answer_matrix[sent_idx][query_idx]['text'][query_by_answer_idx, :len(query_ans_text)] = query_ans_text
+
+                query_ans_isAnswer = answer_text_presence[sent_idx][query_idx][query_by_answer_idx]['isAnswer']
+                if query_ans_isAnswer:
+                    answer_matrix[sent_idx][query_idx]['isAnswer'][query_by_answer_idx] = [1.0, 0.0]
+                else:
+                    answer_matrix[sent_idx][query_idx]['isAnswer'][query_by_answer_idx] = [0.0, 1.0]
+
+
+        # answer character token
+        char_answer_matrix[sent_idx] = dict()
+        for query_idx in answer_text_presence[sent_idx]:
+            # answer text max length = 92
+            char_answer_matrix[sent_idx][query_idx] = dict()
+
+            for query_by_answer_idx in answer_text_presence[sent_idx][query_idx]:
+                text_num = answer_text_presence[sent_idx][query_idx][query_by_answer_idx]
+                char_answer_matrix[sent_idx][query_idx][query_by_answer_idx] = \
+                np.zeros([len(text_num['text']), word_maxlen], dtype=np.float32)
+
+                for char_text_idx in range(len(text_num['text'])):
+                    char_answer_matrix[sent_idx][query_idx][query_by_answer_idx][char_text_idx, :len(text_num['char_text'][char_text_idx])] = \
+                    text_num['char_text'][char_text_idx]
+
+    print ('Shape of Embedding Matrix')
+    print ('One Word Matrix shape : ', word_matrix[0].shape)
+    print ('One Character Matrix shape : ', char_matrix[0].shape)
+
+    print ('One Query Word Matrix shape :', query_matrix['word'][0][0].shape)
+    print ('One Query Character Matrix shape : ', query_matrix['char'][0][0].shape)
+
+    print ('Answer Text Matrix shape : ', answer_matrix[0][0]['text'][0].shape)
+    print ('Answer presence Matrix shape : ', answer_matrix[0][0]['isAnswer'][0].shape)
+
+    print ('Answer Text Character Matrix shape : ', char_answer_matrix[0][0][0].shape)
+
+    return word_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix
+
+def preproecessing():
+    glove_vocab = pickle_dump(glove_vocab=None)
+    preprocess_data = make_data()
+
+    sentence_word, sentence_char, query_word, query_char, answer_text, answer_text_char, word_vocab, \
+    char_vocab, word_maxlen, answer_maxnum = vocab_data(preprocess_data)
+
+    answer_text_presence = make_answer_dict(preprocess_data, answer_text, answer_text_char)
+    word_idx2vec = glove_idx2vec(word_vocab, glove_vocab)
+
+    paragraph_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix = \
+    embedding_matrix(sentence_word, sentence_char, answer_text_presence, query_word, query_char, word_maxlen)
+
+    # batch loader
+
+    # zip input file - one paragraph, one query, one answer
+    return paragraph_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix
