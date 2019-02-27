@@ -256,17 +256,21 @@ def make_answer_dict(preprocess_data, answer_text, answer_text_char):
     return answer_text_presence
 
 def glove_idx2vec(word_vocab, glove_vocab):
-    word_idx2vec = dict()
+    word_idx2vec = np.zeros((len(word_vocab.token2idx), 300), dtype=np.float32)
 
     for word, idx in word_vocab.token2idx.items():
         try:
-            word_idx2vec[word] = glove_vocab[word]
+            word_idx2vec[idx, :] = glove_vocab[word]
         except KeyError as e:
-            word_idx2vec[word] = np.zeros((300), dtype=np.float64)
+            word_idx2vec[idx, :] = glove_vocab['unk']
+
     return word_idx2vec
 
 def embedding_matrix(sentence_word, sentence_char, answer_text_presence, query_word, query_char, word_maxlen):
     sentence_maxlen = 92
+    text_max = 0
+    query_max = 0
+    query_nummax = 0
 
     word_matrix = dict()
     query_matrix = dict()
@@ -277,14 +281,24 @@ def embedding_matrix(sentence_word, sentence_char, answer_text_presence, query_w
     query_matrix['word'] = dict()
     query_matrix['char'] = dict()
 
+
     for sent_idx in sentence_word:
         # paragraph word token
         word_matrix[sent_idx] = np.array(sentence_word[sent_idx], dtype=np.float32)
 
+        if text_max < len(sentence_word[sent_idx]):
+            text_max = len(sentence_word[sent_idx])
+
         # query word token
         query_matrix['word'][sent_idx] = dict()
+
+        if query_nummax < len(query_word[sent_idx]):
+            query_nummax = len(query_word[sent_idx])
+
         for query_idx, query in enumerate(query_word[sent_idx]):
             query_matrix['word'][sent_idx][query_idx] = np.array(query_word[sent_idx][query_idx], dtype=np.float32)
+            if query_max < len(query_word[sent_idx][query_idx]):
+                query_max = len(query_word[sent_idx][query_idx])
 
         # paragraph character token
         char_matrix[sent_idx] = np.zeros([len(sentence_char[sent_idx]), word_maxlen], dtype=np.float32)
@@ -328,13 +342,14 @@ def embedding_matrix(sentence_word, sentence_char, answer_text_presence, query_w
             for query_by_answer_idx in answer_text_presence[sent_idx][query_idx]:
                 text_num = answer_text_presence[sent_idx][query_idx][query_by_answer_idx]
                 char_answer_matrix[sent_idx][query_idx][query_by_answer_idx] = \
-                np.zeros([len(text_num['text']), word_maxlen], dtype=np.float32)
+                np.zeros([sentence_maxlen, word_maxlen], dtype=np.float32)
 
                 for char_text_idx in range(len(text_num['text'])):
                     char_answer_matrix[sent_idx][query_idx][query_by_answer_idx][char_text_idx, :len(text_num['char_text'][char_text_idx])] = \
                     text_num['char_text'][char_text_idx]
 
-    print ('Shape of Embedding Matrix')
+    print ()
+    print ('Shape of Embedding Matrix (Before one sampling)')
     print ('One Word Matrix shape : ', word_matrix[0].shape)
     print ('One Character Matrix shape : ', char_matrix[0].shape)
 
@@ -346,9 +361,53 @@ def embedding_matrix(sentence_word, sentence_char, answer_text_presence, query_w
 
     print ('Answer Text Character Matrix shape : ', char_answer_matrix[0][0][0].shape)
 
-    return word_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix
+    return word_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix, text_max, query_max, query_nummax
 
-def preproecessing():
+def _one_sample(paragraph_matrix, char_matrix, query_matrix, text_max, query_max, query_nummax, word_maxlen):
+    word_text_matrix = np.zeros(shape=[len(paragraph_matrix), text_max], dtype=np.float32)
+    char_text_matrix = np.zeros(shape=[len(char_matrix), text_max, word_maxlen], dtype=np.float32)
+    word_query_matrix = np.zeros(shape=[len(query_matrix['word']), query_nummax, query_max], dtype=np.float32)
+    char_query_matrix = np.zeros(shape=[len(query_matrix['char']), query_nummax, query_max, word_maxlen], dtype=np.float32)
+    # word_answer_matrix = np.zeros(shape=[len(answer_matrix), query_nummax, FLAGS.max_answer], dtype=np.float32)
+
+    for sent_idx in paragraph_matrix:
+        word_text_matrix[sent_idx, :len(paragraph_matrix[sent_idx])] = paragraph_matrix[sent_idx]
+        char_text_matrix[sent_idx, :len(char_matrix[sent_idx]), :] = char_matrix[sent_idx]
+
+        for query_idx in query_matrix['word'][sent_idx]:
+            word_query_matrix[sent_idx, query_idx, :len(query_matrix['word'][sent_idx][query_idx])] = \
+            query_matrix['word'][sent_idx][query_idx]
+
+        for query_idx in query_matrix['char'][sent_idx]:
+            char_query_matrix[sent_idx, query_idx, :len(query_matrix['char'][sent_idx][query_idx]), :] = \
+            query_matrix['char'][sent_idx][query_idx]
+
+
+    print ()
+    print ('Shape of Embedding Matrix (After one sampling)')
+    print ('One Word Matrix shape : ', word_text_matrix[0].shape)
+    print ('One Character Matrix shape : ', char_text_matrix[0].shape)
+
+    print ('One Query Word Matrix shape :', word_query_matrix[0].shape)
+    print ('One Query Character Matrix shape : ', char_query_matrix[0].shape)
+
+    return word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix
+
+def batch_loader(word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix):
+
+    word_text_matrix = np.reshape(word_text_matrix, [FLAGS.batch_size, -1, FLAGS.max_text])
+    char_text_matrix = np.reshape(char_text_matrix, [FLAGS.batch_size, -1, FLAGS.max_text, FLAGS.char_dimension])
+    word_query_matrix = np.reshape(word_query_matrix, [FLAGS.batch_size, -1, FLAGS.max_num_query, FLAGS.max_query])
+    char_query_matrix = np.reshape(char_query_matrix, [FLAGS.batch_size, -1, FLAGS.max_num_query, FLAGS.max_query, FLAGS.char_dimension])
+
+    word_text_matrix = np.transpose(word_text_matrix, axes=(1,0,2))
+    char_text_matrix = np.transpose(char_text_matrix, axes=(1,0,2,3))
+    word_query_matrix = np.transpose(word_query_matrix, axes=(1,0,2,3))
+    char_query_matrix = np.transpose(char_query_matrix, axes=(1,0,2,3,4))
+
+    return word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix
+
+def preprocessing():
     glove_vocab = pickle_dump(glove_vocab=None)
     preprocess_data = make_data()
 
@@ -358,10 +417,11 @@ def preproecessing():
     answer_text_presence = make_answer_dict(preprocess_data, answer_text, answer_text_char)
     word_idx2vec = glove_idx2vec(word_vocab, glove_vocab)
 
-    paragraph_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix = \
+    paragraph_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix, text_max, query_max, query_nummax = \
     embedding_matrix(sentence_word, sentence_char, answer_text_presence, query_word, query_char, word_maxlen)
 
-    # batch loader
+    word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix = \
+    _one_sample(paragraph_matrix, char_matrix, query_matrix, text_max, query_max, query_nummax, word_maxlen)
 
-    # zip input file - one paragraph, one query, one answer
-    return paragraph_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix
+    return word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix, \
+            answer_matrix, char_answer_matrix, word_idx2vec, word_maxlen, char_vocab
