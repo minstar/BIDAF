@@ -34,6 +34,7 @@ class Vocab:
 def clean_str(text):
     text = re.sub('<br>', '', text)
     text = re.sub('</b>', '', text)
+    text = re.sub('<b>', ' ', text)
     text = re.sub(':', ' :', text)
     text = re.sub(',', ' ,', text)
     text = re.sub('"', ' " ', text)
@@ -42,46 +43,21 @@ def clean_str(text):
     text = re.sub(r'\-', ' - ', text)
     text = re.sub(r'\(', '( ', text)
     text = re.sub(r'\)', ' )', text)
-    text = re.sub(r'\'', ' \' ', text)
     text = re.sub(r'\;', ' ;', text)
-    text = re.sub('n\'t', ' n\'t ', text)
+    text = re.sub('n\'t', ' not ', text) # heuristic for glove word table
     text = re.sub(r'\[', '[ ', text)
     text = re.sub(r'\]', ' ]', text)
     text = re.sub(r'\!', ' !', text)
     return text
 
-def make_data():
-    with open(FLAGS.data_dir + FLAGS.train_file + '.json', 'r', encoding='utf-8') as f:
-        data = json.load(f)
-
-    preprocess_data = dict()
-    for idx in range(len(data['data'])):
-        preprocess_data[idx] = dict()
-
-        preprocess_data[idx]['id'] = data['data'][idx]['id']
-        questions = data['data'][idx]['paragraph']['questions']
-        text = data['data'][idx]['paragraph']['text']
-        text = clean_str(text)
-
-        # all sentences in list
-        all_sentences = text.split('<b>')[1:]
-        preprocess_data[idx]['paragraph'] = all_sentences
-
-        preprocess_data[idx]['questions'] = dict()
-        for ques_idx in range(len(questions)):
-            preprocess_data[idx]['questions'][ques_idx] = dict()
-            preprocess_data[idx]['questions'][ques_idx]['query'] = questions[ques_idx]['question']
-            preprocess_data[idx]['questions'][ques_idx]['sentence_used'] = questions[ques_idx]['sentences_used']
-            preprocess_data[idx]['questions'][ques_idx]['answers'] = questions[ques_idx]['answers']
-            preprocess_data[idx]['questions'][ques_idx]['multi_sentence'] = questions[ques_idx]['multisent']
-
-    return preprocess_data
-
 # load pretrained GLOVE file
 def make_glove():
     word_vocab = dict()
-    with open(FLAGS.glove_dir + FLAGS.glove_file, 'r', encoding='utf-8') as f:
-        for idx, line in enumerate(f):
+    start = time.time()
+
+    with open(FLAGS.glove_dir + FLAGS.glove_file, 'r', encoding='utf-8') as reader:
+        print ('Start Making Glove word dictionary')
+        for idx, line in enumerate(reader):
             one_line = line.split()
             try:
                 word = one_line[0]
@@ -112,8 +88,12 @@ def make_glove():
                     embedding = np.array([float(val) for val in one_line[2:]])
                     word_vocab[word] = embedding
 
-        print ('Done Loading Glove model')
+            if (idx+1) % 1000000 == 0:
+                print ('elapsed time for making 100000 word', time.time() - start)
+
+        print ('Done Loading Glove word dictionary')
     return word_vocab
+
 
 def pickle_dump(glove_vocab=None):
     if glove_vocab is None:
@@ -126,134 +106,101 @@ def pickle_dump(glove_vocab=None):
         with open(FLAGS.glove_dir + FLAGS.glove_load, 'wb') as f:
             pickle.dump(glove_vocab, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-def vocab_data(preprocess_data):
-    # --------------------------- Input --------------------------- #
-    # preprocess_data : preprocessed data, which has paragraph, answer, query
 
-    # --------------------------- Output --------------------------- #
-    # sentence_word : it contains paragraph words per index
-    # sentence_char : it contains paragraph characters per index
-    # query_word : it contain query per paragraph related to words info
-    # query_char : it contains query per paragraph related to characters info
-    # word_vocab : token2idx and idx2token word dictionary
-    # char_vocab : token2idx and idx2token character dictionary
-    # word_maxlen : max character length (which is word length)
+def multirc_data_load():
 
-    word_vocab = Vocab()
+    with open('./dataset/splitv2/train_456-fixedIds.json', 'r', encoding='utf-8') as reader:
+        train_data = json.load(reader)
+
+    with open('./dataset/splitv2/dev_83-fixedIds.json', 'r', encoding='utf-8') as reader:
+        dev_data = json.load(reader)
+
+    return train_data, dev_data
+
+def make_data(train_data):
+
+    whole_word = dict()
+    whole_char = dict()
+    query_word = dict()
+    query_char = dict()
+    label_dict = dict()
+    label_word = dict()
+
+    word_maxlen = 0
+    ans_maxnum = 0
+
     char_vocab = Vocab()
+    word_vocab = Vocab()
 
     word_vocab.new_token('UNK')
 
-#     EOS = '|'
-#     word_vocab.new_token(EOS)
-#     char_vocab.new_token(EOS)
+    for data_idx in range(len(train_data['data'])):
+        whole_word[data_idx] = list()
+        whole_char[data_idx] = list()
 
-    sentence_word = dict()
-    sentence_char = dict()
-    query_word = dict()
-    query_char = dict()
-    answer_text = dict()
-    answer_text_char = dict()
+        query_word[data_idx] = dict()
+        query_char[data_idx] = dict()
 
-    # word max length
-    word_maxlen = 0
-    answer_maxnum = 0
+        label_dict[data_idx] = dict()
+        label_word[data_idx] = dict()
 
-    for idx in range(len(preprocess_data)):
-        paragraph = preprocess_data[idx]['paragraph']
-        sentence_word[idx] = list()
-        sentence_char[idx] = list()
+        # one text and many questions
+        # In one question, it has many answers
+        text = clean_str(train_data['data'][data_idx]['paragraph']['text'])
+        text = text.split('Sent')[1:]
+        questions = train_data['data'][data_idx]['paragraph']['questions']
 
-        queries = preprocess_data[idx]['questions']
-        query_word[idx] = list()
-        query_char[idx] = list()
-        answer_text[idx] = dict()
-        answer_text_char[idx] = dict()
+        # text : make word vocabulary dictionary and character vocabulary dictionary
+        for sent_idx in range(len(text)):
+            new_sent = text[sent_idx][5:].split()
 
-        # paragraph preprocessing
-        for sent_idx, sentence in enumerate(paragraph):
+            for word in new_sent:
+                whole_word[data_idx].append(word_vocab.new_token(word))
 
-            for word in sentence.split():
-                # word token into dictionary
-                sentence_word[idx].append(word_vocab.new_token(word))
-
-                # character token into dictionary
-                sentence_char[idx].append([char_vocab.new_token(c) for c in word])
+                whole_char[data_idx].append([char_vocab.new_token(c) for c in word])
 
                 if len(word) > word_maxlen:
                     word_maxlen = len(word)
 
-#             sentence_word[idx].append(word_vocab.get_index(EOS))
-#             sentence_char[idx].append(char_vocab.get_index(EOS))
+        # question : make question word vocabulary dictionary and character vocabulary dictionary
+        for ques_idx in range(len(questions)):
+            new_ques = clean_str(questions[ques_idx]['question'])
+            label_dict[data_idx][ques_idx] = dict()
+            label_word[data_idx][ques_idx] = dict()
 
-        # query preprocessing
-        for query_idx in queries:
-            query_word_list = list()
-            query_char_list = list()
-            answer_text[idx][query_idx] = dict()
-            answer_text_char[idx][query_idx] = dict()
+            query_word[data_idx][ques_idx] = list()
+            query_char[data_idx][ques_idx] = list()
 
-            query_dict = queries[query_idx]
-            query_parsed = clean_str(query_dict['query'])
-            answer_list = queries[query_idx]['answers']
+            for word in new_ques.split():
+                query_word[data_idx][ques_idx].append(word_vocab.new_token(word))
 
-            for word in query_parsed.split():
-                # word token into dictionary
-                query_word_list.append(word_vocab.new_token(word))
-                #query_word[idx].append(word_vocab.new_token(word))
-
-                # character token into dictionary
-                query_char_list.append([char_vocab.new_token(c) for c in word])
-                #query_char[idx].append([char_vocab.new_token(c) for c in word])
+                query_char[data_idx][ques_idx].append([char_vocab.new_token(c) for c in word])
 
                 if len(word) > word_maxlen:
                     word_maxlen = len(word)
 
-            query_word[idx].append(query_word_list)
-            query_char[idx].append(query_char_list)
+            # answer text and answer presence
+            new_ans = questions[ques_idx]['answers']
 
-            # Answer preprocessing
-            for answer_idx, answer in enumerate(answer_list):
-                answer_text[idx][query_idx][answer_idx] = list()
-                answer_text_char[idx][query_idx][answer_idx] = list()
-                answer_parsed = clean_str(answer['text'])
+            for ans_idx in range(len(new_ans)):
+                label_word[data_idx][ques_idx][ans_idx] = list()
+                label_dict[data_idx][ques_idx][ans_idx] = np.zeros((2), dtype=np.int32)
 
-                for word in answer_parsed.split():
-                    # word token into dictionary
-                    answer_text[idx][query_idx][answer_idx].append(word_vocab.new_token(word))
+                ans_text = clean_str(new_ans[ans_idx]['text'])
+                # answer presence
+                if new_ans[ans_idx]['isAnswer']:
+                    label_dict[data_idx][ques_idx][ans_idx] = [1, 0]
+                else:
+                    label_dict[data_idx][ques_idx][ans_idx] = [0, 1]
 
-                    # character token into dictionary
-                    answer_text_char[idx][query_idx][answer_idx].append([char_vocab.new_token(c) for c in word])
+                # answer text if character need then you need to add the code
+                for word in ans_text.split():
+                    label_word[data_idx][ques_idx][ans_idx].append(word_vocab.new_token(word))
 
-                    if len(word) > word_maxlen:
-                        word_maxlen = len(word)
+            if ans_maxnum < len(new_ans):
+                ans_maxnum = len(new_ans)
 
-            if len(answer_list) + 1 > answer_maxnum:
-                answer_maxnum = len(answer_list) + 1
-
-    return sentence_word, sentence_char, query_word, query_char, answer_text, answer_text_char, \
-            word_vocab, char_vocab, word_maxlen, answer_maxnum
-
-def make_answer_dict(preprocess_data, answer_text, answer_text_char):
-
-    answer_text_presence = dict()
-
-    for idx in preprocess_data:
-        answer_text_presence[idx] = dict()
-        queries = preprocess_data[idx]['questions']
-
-        for query_idx in queries:
-            answer_text_presence[idx][query_idx] = dict()
-            # answer list with (text, isAnswer, scores)
-            answers = queries[query_idx]['answers']
-
-            for answer_idx, answer in enumerate(answers):
-                answer_text_presence[idx][query_idx][answer_idx] = dict()
-                answer_text_presence[idx][query_idx][answer_idx]['isAnswer'] = 1.0 if answer['isAnswer'] else 0.0
-                answer_text_presence[idx][query_idx][answer_idx]['text'] = answer_text[idx][query_idx][answer_idx]
-                answer_text_presence[idx][query_idx][answer_idx]['char_text'] = answer_text_char[idx][query_idx][answer_idx]
-
-    return answer_text_presence
+    return word_vocab, char_vocab, whole_word, whole_char, query_word, query_char, label_dict, label_word, word_maxlen, ans_maxnum
 
 def glove_idx2vec(word_vocab, glove_vocab):
     word_idx2vec = np.zeros((len(word_vocab.token2idx), 300), dtype=np.float32)
@@ -266,162 +213,97 @@ def glove_idx2vec(word_vocab, glove_vocab):
 
     return word_idx2vec
 
-def embedding_matrix(sentence_word, sentence_char, answer_text_presence, query_word, query_char, word_maxlen):
-    sentence_maxlen = 92
-    text_max = 0
-    query_max = 0
-    query_nummax = 0
+def embedding_matrix(whole_word, whole_char, query_word, query_char, label_word):
+    text_word = np.zeros((456, FLAGS.max_text), dtype=np.int32)
+    text_char = np.zeros((456, FLAGS.max_text, FLAGS.max_char), dtype=np.int32)
+    question_word = np.zeros((456, FLAGS.max_num_query, FLAGS.max_query_text), dtype=np.int32)
+    question_char = np.zeros((456, FLAGS.max_num_query, FLAGS.max_query_text, FLAGS.max_query_char), dtype=np.int32)
+    answer_word = np.zeros((456, FLAGS.max_num_query, FLAGS.max_num_answer, FLAGS.max_answer), dtype=np.int32)
 
-    word_matrix = dict()
-    query_matrix = dict()
-    char_matrix = dict()
-    answer_matrix = dict()
-    char_answer_matrix = dict()
+    for data_idx in range(len(whole_word)):
+        # paragraph text word array
+        text_word[data_idx, :len(whole_word[data_idx])] = whole_word[data_idx]
 
-    query_matrix['word'] = dict()
-    query_matrix['char'] = dict()
+        # paragraph text character array
+        for word_idx in range(len(whole_char[data_idx])):
+            text_char[data_idx, word_idx, :len(whole_char[data_idx][word_idx])] = whole_char[data_idx][word_idx]
 
+        # question text word array
+        for ques_idx in range(len(query_word[data_idx])):
+            question_word[data_idx, ques_idx, :len(query_word[data_idx][ques_idx])] = query_word[data_idx][ques_idx]
 
-    for sent_idx in sentence_word:
-        # paragraph word token
-        word_matrix[sent_idx] = np.array(sentence_word[sent_idx], dtype=np.float32)
+        # question text character array
+        for ques_idx in range(len(query_char[data_idx])):
+            for word_idx in range(len(query_char[data_idx][ques_idx])):
+                question_char[data_idx, ques_idx, word_idx, :len(query_char[data_idx][ques_idx][word_idx])] = query_char[data_idx][ques_idx][word_idx]
 
-        if text_max < len(sentence_word[sent_idx]):
-            text_max = len(sentence_word[sent_idx])
+        # answer text word array
+        for ques_idx in range(len(label_word[data_idx])):
+            for ans_idx in range(len(label_word[data_idx][ques_idx])):
+                answer_word[data_idx, ques_idx, ans_idx, :len(label_word[data_idx][ques_idx][ans_idx])] = label_word[data_idx][ques_idx][ans_idx]
 
-        # query word token
-        query_matrix['word'][sent_idx] = dict()
+    print ('Text paragraph word array size', text_word.shape)
+    print ('Text paragraph character array size', text_char.shape)
+    print ('Question word array size', question_word.shape)
+    print ('Question character array size', question_char.shape)
+    print ('Answer word array size', answer_word.shape)
 
-        if query_nummax < len(query_word[sent_idx]):
-            query_nummax = len(query_word[sent_idx])
+    return text_word, text_char, question_word, question_char, answer_word
 
-        for query_idx, query in enumerate(query_word[sent_idx]):
-            query_matrix['word'][sent_idx][query_idx] = np.array(query_word[sent_idx][query_idx], dtype=np.float32)
-            if query_max < len(query_word[sent_idx][query_idx]):
-                query_max = len(query_word[sent_idx][query_idx])
+def batch_loader(text_word, text_char, question_word, question_char, answer_word):
 
-        # paragraph character token
-        char_matrix[sent_idx] = np.zeros([len(sentence_char[sent_idx]), word_maxlen], dtype=np.float32)
-        for word_idx, char_list in enumerate(sentence_char[sent_idx]):
-            char_matrix[sent_idx][word_idx, :len(char_list)] = char_list
+    reduced_length = (len(text_word) // FLAGS.batch_size) * FLAGS.batch_size
 
-        # query character token
-        query_matrix['char'][sent_idx] = dict()
-        for query_idx, query in enumerate(query_char[sent_idx]):
-            query_matrix['char'][sent_idx][query_idx] = np.zeros([len(query_char[sent_idx][query_idx]), word_maxlen], dtype=np.float32)
-            for word_idx, char_list in enumerate(query_char[sent_idx][query_idx]):
-                query_matrix['char'][sent_idx][query_idx][word_idx, :len(char_list)] = char_list
+    text_word = text_word[:reduced_length]
+    text_char = text_char[:reduced_length]
+    question_word = question_word[:reduced_length]
+    question_char = question_char[:reduced_length]
+    answer_word = answer_word[:reduced_length]
 
-        # answer word token
-        answer_matrix[sent_idx] = dict()
-        for query_idx in answer_text_presence[sent_idx]:
-            # answer text max length = 92
-            answer_matrix[sent_idx][query_idx] = dict()
-            answer_matrix[sent_idx][query_idx]['isAnswer'] = np.zeros([len(answer_text_presence[sent_idx][query_idx]), 2], \
-                                                                     dtype=np.float32)
-            answer_matrix[sent_idx][query_idx]['text'] = np.zeros([len(answer_text_presence[sent_idx][query_idx]), sentence_maxlen], \
-                                                                  dtype=np.int32)
+    text_word = np.reshape(text_word, [-1, FLAGS.batch_size, FLAGS.max_text])
+    text_char = np.reshape(text_char, [-1, FLAGS.batch_size, FLAGS.max_text, FLAGS.max_char])
+    question_word = np.reshape(question_word, [-1, FLAGS.batch_size, FLAGS.max_num_query, FLAGS.max_query_text])
+    question_char = np.reshape(question_char, [-1, FLAGS.batch_size, FLAGS.max_num_query, FLAGS.max_query_text, FLAGS.max_query_char])
+    answer_word = np.reshape(answer_word, [-1, FLAGS.batch_size, FLAGS.max_num_query, FLAGS.max_num_answer, FLAGS.max_answer])
 
-            for query_by_answer_idx in answer_text_presence[sent_idx][query_idx]:
-                query_ans_text = answer_text_presence[sent_idx][query_idx][query_by_answer_idx]['text']
-                answer_matrix[sent_idx][query_idx]['text'][query_by_answer_idx, :len(query_ans_text)] = query_ans_text
+    return text_word, text_char, question_word, question_char, answer_word
 
-                query_ans_isAnswer = answer_text_presence[sent_idx][query_idx][query_by_answer_idx]['isAnswer']
-                if query_ans_isAnswer:
-                    answer_matrix[sent_idx][query_idx]['isAnswer'][query_by_answer_idx] = [1.0, 0.0]
-                else:
-                    answer_matrix[sent_idx][query_idx]['isAnswer'][query_by_answer_idx] = [0.0, 1.0]
+def random_shuffle(text_word, text_char, question_word, question_char, answer_word):
 
+    text_word, text_char, question_word, question_char, answer_word = \
+    shuffle(text_word, text_char, question_word, question_char, answer_word)
 
-        # answer character token
-        char_answer_matrix[sent_idx] = dict()
-        for query_idx in answer_text_presence[sent_idx]:
-            # answer text max length = 92
-            char_answer_matrix[sent_idx][query_idx] = dict()
+    return text_word, text_char, question_word, question_char, answer_word
 
-            for query_by_answer_idx in answer_text_presence[sent_idx][query_idx]:
-                text_num = answer_text_presence[sent_idx][query_idx][query_by_answer_idx]
-                char_answer_matrix[sent_idx][query_idx][query_by_answer_idx] = \
-                np.zeros([sentence_maxlen, word_maxlen], dtype=np.float32)
+def zip_file(text_word, text_char, question_word, question_char, answer_word):
+    text_word = list(text_word)
+    text_char = list(text_char)
+    question_word = list(question_word)
+    question_char = list(question_char)
+    answer_word = list(answer_word)
 
-                for char_text_idx in range(len(text_num['text'])):
-                    char_answer_matrix[sent_idx][query_idx][query_by_answer_idx][char_text_idx, :len(text_num['char_text'][char_text_idx])] = \
-                    text_num['char_text'][char_text_idx]
+    zip_list = list(zip(text_word, text_char, question_word, question_char, answer_word))
 
-    print ()
-    print ('Shape of Embedding Matrix (Before one sampling)')
-    print ('One Word Matrix shape : ', word_matrix[0].shape)
-    print ('One Character Matrix shape : ', char_matrix[0].shape)
+    return zip_list
 
-    print ('One Query Word Matrix shape :', query_matrix['word'][0][0].shape)
-    print ('One Query Character Matrix shape : ', query_matrix['char'][0][0].shape)
-
-    print ('Answer Text Matrix shape : ', answer_matrix[0][0]['text'][0].shape)
-    print ('Answer presence Matrix shape : ', answer_matrix[0][0]['isAnswer'][0].shape)
-
-    print ('Answer Text Character Matrix shape : ', char_answer_matrix[0][0][0].shape)
-
-    return word_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix, text_max, query_max, query_nummax
-
-def _one_sample(paragraph_matrix, char_matrix, query_matrix, text_max, query_max, query_nummax, word_maxlen):
-    word_text_matrix = np.zeros(shape=[len(paragraph_matrix), text_max], dtype=np.float32)
-    char_text_matrix = np.zeros(shape=[len(char_matrix), text_max, word_maxlen], dtype=np.float32)
-    word_query_matrix = np.zeros(shape=[len(query_matrix['word']), query_nummax, query_max], dtype=np.float32)
-    char_query_matrix = np.zeros(shape=[len(query_matrix['char']), query_nummax, query_max, word_maxlen], dtype=np.float32)
-    # word_answer_matrix = np.zeros(shape=[len(answer_matrix), query_nummax, FLAGS.max_answer], dtype=np.float32)
-
-    for sent_idx in paragraph_matrix:
-        word_text_matrix[sent_idx, :len(paragraph_matrix[sent_idx])] = paragraph_matrix[sent_idx]
-        char_text_matrix[sent_idx, :len(char_matrix[sent_idx]), :] = char_matrix[sent_idx]
-
-        for query_idx in query_matrix['word'][sent_idx]:
-            word_query_matrix[sent_idx, query_idx, :len(query_matrix['word'][sent_idx][query_idx])] = \
-            query_matrix['word'][sent_idx][query_idx]
-
-        for query_idx in query_matrix['char'][sent_idx]:
-            char_query_matrix[sent_idx, query_idx, :len(query_matrix['char'][sent_idx][query_idx]), :] = \
-            query_matrix['char'][sent_idx][query_idx]
-
-
-    print ()
-    print ('Shape of Embedding Matrix (After one sampling)')
-    print ('One Word Matrix shape : ', word_text_matrix[0].shape)
-    print ('One Character Matrix shape : ', char_text_matrix[0].shape)
-
-    print ('One Query Word Matrix shape :', word_query_matrix[0].shape)
-    print ('One Query Character Matrix shape : ', char_query_matrix[0].shape)
-
-    return word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix
-
-def batch_loader(word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix):
-
-    word_text_matrix = np.reshape(word_text_matrix, [FLAGS.batch_size, -1, FLAGS.max_text])
-    char_text_matrix = np.reshape(char_text_matrix, [FLAGS.batch_size, -1, FLAGS.max_text, FLAGS.char_dimension])
-    word_query_matrix = np.reshape(word_query_matrix, [FLAGS.batch_size, -1, FLAGS.max_num_query, FLAGS.max_query])
-    char_query_matrix = np.reshape(char_query_matrix, [FLAGS.batch_size, -1, FLAGS.max_num_query, FLAGS.max_query, FLAGS.char_dimension])
-
-    word_text_matrix = np.transpose(word_text_matrix, axes=(1,0,2))
-    char_text_matrix = np.transpose(char_text_matrix, axes=(1,0,2,3))
-    word_query_matrix = np.transpose(word_query_matrix, axes=(1,0,2,3))
-    char_query_matrix = np.transpose(char_query_matrix, axes=(1,0,2,3,4))
-
-    return word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix
-
-def preprocessing():
+def load_data():
+    # make glove pickle file
+    # glove_vocab = make_glove()
     glove_vocab = pickle_dump(glove_vocab=None)
-    preprocess_data = make_data()
-
-    sentence_word, sentence_char, query_word, query_char, answer_text, answer_text_char, word_vocab, \
-    char_vocab, word_maxlen, answer_maxnum = vocab_data(preprocess_data)
-
-    answer_text_presence = make_answer_dict(preprocess_data, answer_text, answer_text_char)
+    # data load
+    train_data, dev_data = multirc_data_load()
+    # make data from original data
+    word_vocab, char_vocab, whole_word, whole_char, query_word, query_char,\
+    label_dict, label_word, word_maxlen, ans_maxnum = make_data(train_data)
+    # glove word2vec table
     word_idx2vec = glove_idx2vec(word_vocab, glove_vocab)
+    # make list to array
+    text_word, text_char, question_word, question_char, answer_word = embedding_matrix(whole_word, whole_char, query_word, query_char, label_word)
+    # make as batch file
+    text_word, text_char, question_word, question_char, answer_word = batch_loader(text_word, text_char, question_word, question_char, answer_word)
+    # random shuffling
+    text_word, text_char, question_word, question_char, answer_word = random_shuffle(text_word, text_char, question_word, question_char, answer_word)
+    # zip all file to one sample
+    zip_list = zip_file(text_word, text_char, question_word, question_char, answer_word)
 
-    paragraph_matrix, char_matrix, query_matrix, answer_matrix, char_answer_matrix, text_max, query_max, query_nummax = \
-    embedding_matrix(sentence_word, sentence_char, answer_text_presence, query_word, query_char, word_maxlen)
-
-    word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix = \
-    _one_sample(paragraph_matrix, char_matrix, query_matrix, text_max, query_max, query_nummax, word_maxlen)
-
-    return word_text_matrix, char_text_matrix, word_query_matrix, char_query_matrix, \
-            answer_matrix, char_answer_matrix, word_idx2vec, word_maxlen, char_vocab
+    return zip_list, word_idx2vec
