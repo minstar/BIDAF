@@ -1,45 +1,25 @@
-import tensorflow as tf
+import argparse
 
-flags = tf.app.flags
-FLAGS = flags.FLAGS
+def get_args():
+    argp = argparse.ArgumentParser(description='BIDAF', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-flags.DEFINE_string('f', '', 'kernel')
-flags.DEFINE_string('data_dir', './dataset/splitv2/', 'Multi-Sentence Reading Comprehension dataset direcitory')
-flags.DEFINE_string('train_file', 'train_456-fixedIds', 'train filename')
-flags.DEFINE_string('dev_file', 'dev_83-fixedIds', 'dev filename')
-flags.DEFINE_string('glove_dir', './dataset/glove.840B.300d/', 'GLOVE 840B 300 dimension file path')
-flags.DEFINE_string('glove_dir_6b', './dataset/glove.6B/', 'GLOVE 6B file path')
-flags.DEFINE_string('glove_file', 'glove.840B.300d.txt', 'GLOVE 840B, 300d pretrained file name')
-flags.DEFINE_string('glove_load', 'glove_dict.pkl', 'preprocessed GLOVE 840B, 300d pretrained file name')
+    # data direction
+    argp.add_argument('--train_dir', type=str, default='./dataset/squad_v1.1/')
+    argp.add_argument('--train_file', type=str, default='train-v1.1.json')
+    argp.add_argument('--dev_file', type=str, default='dev-v1.1.json')
+    argp.add_argument('--glove_dir', type=str, default='./pretrained/glove.840B.300d/')
+    argp.add_argument('--glove_file', type=str, default='glove.840B.300d.txt')
+    argp.add_argument('--glove_load', type=str, default='glove_dict.pkl')
 
-flags.DEFINE_list('except1_idx', [52343, 151102, 209833, 220779], 'first key value error index list in glove')
-flags.DEFINE_list('except2_idx', [128261, 200668, 253461, 365745, 532048, 717302, \
-                                994818, 1123331, 1148409, 1352110, 1499727, 1533809, \
-                                1899841, 1921152, 2058966, 2165246], 'second key value error index list in glove')
-flags.DEFINE_list('kernel_features', [100], 'kernel size as small data')
-flags.DEFINE_list('kernel_width', [5], 'kernel width as small data')
+    # data control
+    argp.add_argument('--kernel_features', type=list, default=[100])
+    argp.add_argument('--kernel_width', type=list, default=[5])
+    argp.add_argument('--max_ques', type=int, default=60)
+    argp.add_argument('--max_ques_char', type=int, default=25)
+    argp.add_argument('--max_cont', type=int, default=791)
+    argp.add_argument('--max_cont_char', type=int, default=37)
+    argp.add_argument('--batch_size', type=int, default=32)
 
-flags.DEFINE_float('dropout', 0.5, 'LSTM dropout')
+    # model control
 
-flags.DEFINE_integer('word_embedding_size', 300, 'glove word embedding sizes')
-flags.DEFINE_integer('char_vocab_size', 107, 'character vocabulary size')
-flags.DEFINE_integer('char_dimension', 20, 'choose the character dimension')
-flags.DEFINE_integer('batch_size', 32, 'batch size of training time')
-flags.DEFINE_integer('max_text', 615, 'max paragraph sizes')
-flags.DEFINE_integer('max_char', 23, 'max length of one word')
-flags.DEFINE_integer('max_num_query', 31, 'max number of query sizes')
-flags.DEFINE_integer('max_query_text', 52, 'max query sizes')
-flags.DEFINE_integer('max_query_char', 20, 'max length of one word in question')
-flags.DEFINE_integer('max_num_answer', 21, 'max number of query answers')
-flags.DEFINE_integer('max_answer', 90, 'max number of answer words')
-flags.DEFINE_integer('LSTM_hidden', 300, 'number of LSTM hidden units')
-flags.DEFINE_integer('LSTM_layers', 2, 'number of LSTM layers')
-flags.DEFINE_integer('Highway_layers', 2, 'number of highway layers')
-
-# def main(_):
-#     FLAGS = flags.FLAGS
-#
-#     m(config)
-#
-# if __name__ == "__main__":
-#     tf.app.run()
+    return argp.parse_args()
