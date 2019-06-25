@@ -16,12 +16,13 @@ flags.DEFINE_list('except1_idx', [52343, 151102, 209833, 220779], 'first key val
 flags.DEFINE_list('except2_idx', [128261, 200668, 253461, 365745, 532048, 717302, \
                                 994818, 1123331, 1148409, 1352110, 1499727, 1533809, \
                                 1899841, 1921152, 2058966, 2165246], 'second key value error index list in glove')
-flags.DEFINE_list('kernel_features', [25, 50, 75, 100, 125, 150], 'kernel size as small data')
-flags.DEFINE_list('kernel_width', [1,2,3,4,5,6], 'kernel width as small data')
+flags.DEFINE_list('kernel_features', [100], 'kernel size as small data')
+flags.DEFINE_list('kernel_width', [5], 'kernel width as small data')
 
 flags.DEFINE_float('dropout', 0.5, 'LSTM dropout')
 
 flags.DEFINE_integer('word_embedding_size', 300, 'glove word embedding sizes')
+flags.DEFINE_integer('char_vocab_size', 107, 'character vocabulary size')
 flags.DEFINE_integer('char_dimension', 20, 'choose the character dimension')
 flags.DEFINE_integer('batch_size', 32, 'batch size of training time')
 flags.DEFINE_integer('max_text', 615, 'max paragraph sizes')
@@ -31,8 +32,9 @@ flags.DEFINE_integer('max_query_text', 52, 'max query sizes')
 flags.DEFINE_integer('max_query_char', 20, 'max length of one word in question')
 flags.DEFINE_integer('max_num_answer', 21, 'max number of query answers')
 flags.DEFINE_integer('max_answer', 90, 'max number of answer words')
-flags.DEFINE_integer('LSTM_hidden', 500, 'number of LSTM hidden units') # 500
+flags.DEFINE_integer('LSTM_hidden', 300, 'number of LSTM hidden units')
 flags.DEFINE_integer('LSTM_layers', 2, 'number of LSTM layers')
+flags.DEFINE_integer('Highway_layers', 2, 'number of highway layers')
 
 # def main(_):
 #     FLAGS = flags.FLAGS
