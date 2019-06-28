@@ -1,128 +1,157 @@
 import tensorflow as tf
+import pdb
 
-from config import *
+from config import get_args
+from preprocess import Squad_Dataset
 
-# word_embedding
-class word_embedding:
-    def __init__(self, word_idx2vec):
+class BIDAF():
+    def __init__(self, config, word_idx2vec):
+        self.config = config
         self.word_idx2vec = word_idx2vec
+        self.keep_prob = 1 - self.config.dropout
 
-    def text_word_embedding(self, scope=None):
-        word_text_input = tf.placeholder(tf.int32, [FLAGS.max_text])
+        self.build_model()
 
+    def word_embedding(self, word_input, scope=None):
+        ### make word embedding of context or question.
+        ### word_input : context word or question word
         with tf.variable_scope(scope):
             glove_table = tf.get_variable('glove_table', initializer=self.word_idx2vec, trainable=False)
-            self.text_glove = tf.nn.embedding_lookup(glove_table, word_text_input)
+            glove_embed = tf.nn.embedding_lookup(glove_table, word_input)
 
-        return self.text_glove # (677, 300)
+        return glove_embed
 
-    def query_word_embedding(self, scope=None):
-        word_query_input = tf.placeholder(tf.int32, [FLAGS.max_num_query, FLAGS.max_query])
+    def char_embedding(self, char_input, is_query=None, scope=None):
+        ### make character embedding of context or question.
+        ### char_input : context character or question character
+        with tf.variable_scope(scope):
+            char_embed = tf.get_variable('char_embed', shape=[self.config.char_6b, self.config.char_dim]) # for convenience of training time.
+            # zero padding
+            char_embed_pad = tf.scatter_update(ref=char_embed, indices=[0], \
+                                                updates=tf.constant(0.0, tf.float32, [1, self.config.char_dim]))
+
+            input_embed = tf.nn.embedding_lookup(char_embed, char_input)
+            output_embed = self.TDNN(input_embed, is_query, scope='TDNN')
+        return output_embed
+
+    def conv2d(self, input_char, filter_width, filter_num, scope=None):
+        with tf.variable_scope(scope):
+            w = tf.get_variable(name="filters", shape=[1, filter_width, self.config.char_dim, filter_num]) # (1, 5, 20, 100)
+            b = tf.get_variable(name='filters_bias', shape=[filter_num])
+
+        return tf.nn.conv2d(input_char, w, strides=[1,1,1,1], padding='VALID') + b
+
+    def TDNN(self, input_embed, is_query=True, scope=None):
+        layers = list()
+        with tf.variable_scope(scope):
+            for kernel_size, kernel_feature_size in zip(self.config.filter_width, self.config.filter_num):
+                conv = self.conv2d(input_embed, kernel_size, kernel_feature_size, scope="filter_%d"%kernel_size)
+                if is_query:
+                    # question
+                    pool = tf.nn.max_pool(tf.tanh(conv), ksize=(1,1,self.config.max_ques_char-kernel_size+1,1), strides=[1,1,1,1], padding='VALID')
+                else:
+                    pool = tf.nn.max_pool(tf.tanh(conv), ksize=(1,1,self.config.max_cont_char-kernel_size+1,1), strides=[1,1,1,1], padding='VALID')
+
+                layers.append(tf.squeeze(pool, axis=[2]))
+
+            output = tf.concat(layers, axis=2)
+            return output
+
+    def highway(self, input_highway, bias=-2.0, scope=None):
+        ### Highway network to get interpolation result
+        output_dim = input_highway.get_shape()[2]
+        input_highway = tf.reshape(input_highway, [-1, output_dim])
 
         with tf.variable_scope(scope):
-            glove_table = tf.get_variable('glove_table', initializer=self.word_idx2vec, trainable=False)
-            self.query_glove = tf.nn.embedding_lookup(glove_table, word_query_input)
+            for i in range(self.config.highway_layers):
+                t = tf.sigmoid(self.Affine_Transformation(input_highway, output_dim, scope='transgate_%d' % i) + bias)
+                g = tf.nn.relu(self.Affine_Transformation(input_highway, output_dim, scope='MLP_%d' % i))
 
-        return self.query_glove # (31, 53, 300)
+                z = t * g + (1.0 - t) * input_highway
 
-# character_embedding
-def conv2d(input_char, filter_num, filter_width, name="conv2d"):
-    # --------------------------- Input --------------------------- #
-    # input_char : shape of (max_text, word_maxlen, char_dimension)
-    # filter_num : [25, 50, 75, 100, 125, 150] subscribed in paper
-    # filter_width : [1,2,3,4,5,6] subscribed in paper.
+                if self.config.highway_layers > 1:
+                    ### convert next (t+1) highway input to (t) output
+                    input_highway = z
 
-    # --------------------------- Output --------------------------- #
-    # convolution output, filtered with each kernel size and width
-    with tf.variable_scope(name):
-        w = tf.get_variable(name="filters", shape=[1, filter_width, FLAGS.char_dimension, filter_num])
-        b = tf.get_variable(name='filters_bias', shape=[filter_num])
+            z = tf.reshape(z, [self.config.batch_size, -1, output_dim])
+            return z
 
-    return tf.nn.conv2d(input_char, w, strides=[1,1,1,1], padding='VALID') + b
-
-def TDNN(input_embedded, scope='TDNN'):
-    # --------------------------- Input --------------------------- #
-    # input_embedded : shape of (max_text, word_maxlen, char_dimension)
-    # example : (677, 23, 15)
-
-    # --------------------------- Output --------------------------- #
-    # output : Concatenated version of max-over-time pooling layer
-
-    word_maxlen = input_embedded.get_shape()[1]
-
-    # make channel as 1 with expand_dim
-    input_char = tf.expand_dims(input_embedded, axis=1) # (677, 1, 23, 15)
-
-    layers = list()
-    with tf.variable_scope(scope):
-        for kernel_size, kernel_feature_size in zip(FLAGS.kernel_width, FLAGS.kernel_features):
-
-            conv = conv2d(input_char, kernel_feature_size, kernel_size, name="kernel_%d" % kernel_size)
-
-            pool = tf.nn.max_pool(tf.tanh(conv), ksize=(1,1,word_maxlen-kernel_size + 1,1), strides=[1,1,1,1], padding='VALID')
-
-            # get feature map when needed
-            layers.append(tf.squeeze(pool, axis=[1,2]))
-
-        output = tf.concat(layers, axis=1)
-
-    return output
-
-class char_embedding:
-    def __init__(self, word_maxlen, char_size=124):
-        self.word_maxlen = word_maxlen
-        self.char_size = char_size
-
-    def text_char_embedding(self, scope=None):
-        char_text_input = tf.placeholder(tf.int32, [FLAGS.max_text, self.word_maxlen])
-
+    def Affine_Transformation(self, input_highway, output_dim, scope=None):
+        ### input_highway : word embedding + char embedding - (batch * max_context, dim_sum)
         with tf.variable_scope(scope):
-            char_embedding = tf.get_variable('char_text_emb', shape=[self.char_size, FLAGS.char_dimension])
+            w = tf.get_variable(name="highway_matrix", shape=[output_dim, input_highway.get_shape()[1]], dtype=tf.float32)
+            b = tf.get_variable(name="highway_bias", shape=[output_dim], dtype=tf.float32)
 
-            # first row zero padding, if needed
-            char_embedding_padded = tf.scatter_update(ref=char_embedding, indices=[0], \
-                                                     updates=tf.constant(0.0, tf.float32, [1, FLAGS.char_dimension]))
+            return tf.matmul(input_highway, w) + b
 
-            self.input_embedded = tf.nn.embedding_lookup(char_embedding, char_text_input) # (677, 23, 15)
-
-            self.output_embedded = TDNN(self.input_embedded, scope='TDNN')
-
-        return self.output_embedded # (677, 525)
-
-    def query_char_embedding(self, scope=None):
-        char_text_input = tf.placeholder(tf.int32, [FLAGS.max_num_query, FLAGS.max_query, self.word_maxlen])
-
+    def context_embedding(self, context_input, scope=None):
+        ### utilizing contextual cues in word embedding
         with tf.variable_scope(scope):
-            char_embedding = tf.get_variable('char_text_emb', shape=[self.char_size, FLAGS.char_dimension])
+            fw_cells = [tf.nn.rnn_cell.LSTMCell(64, state_is_tuple=True) for _ in range(self.config.lstm_layers)]
+            bw_cells = [tf.nn.rnn_cell.LSTMCell(64, state_is_tuple=True) for _ in range(self.config.lstm_layers)]
 
-            # first row zero padding, if needed
-            char_embedding_padded = tf.scatter_update(ref=char_embedding, indices=[0], \
-                                                     updates=tf.constant(0.0, tf.float32, [1, FLAGS.char_dimension]))
+            fw_dropout = [tf.nn.rnn_cell.DropoutWrapper(cell, input_keep_prob=self.keep_prob, output_keep_prob=self.keep_prob) for cell in fw_cells]
+            bw_dropout = [tf.nn.rnn_cell.DropoutWrapper(cell, input_keep_prob=self.keep_prob, output_keep_prob=self.keep_prob) for cell in bw_cells]
 
-            self.input_embedded = tf.nn.embedding_lookup(char_embedding, char_text_input)
+            fw_cell = tf.nn.rnn_cell.MultiRNNCell(fw_dropout, state_is_tuple=True)
+            bw_cell = tf.nn.rnn_cell.MultiRNNCell(bw_dropout, state_is_tuple=True)
 
-            self.output_embedded = TDNN(self.input_embedded, scope='TDNN')
+            output, _ = tf.nn.bidirectional_dynamic_rnn(fw_cell, bw_cell, context_input, time_major=True, dtype=tf.float32)
 
-        return self.output_embedded
-
-# contextual embedding
-def lstm_cell():
-    lstm_fw_cell = tf.contrib.rnn.BasicLSTMCell(FLAGS.LSTM_hidden, state_is_tuple=True, forget_bias=0.0, reuse=False)
-    lstm_bw_cell = tf.contrib.rnn.BasicLSTMCell(FLAGS.LSTM_hidden, state_is_tuple=True, forget_bias=0.0, reuse=False)
-
-    if FLAGS.dropout > 0.0:
-        lstm_fw_cell = tf.contrib.rnn.DropoutWrapper(lstm_fw_cell, output_keep_prob=1.0 - FLAGS.dropout)
-        lstm_bw_cell = tf.contrib.rnn.DropoutWrapper(lstm_bw_cell, output_keep_prob=1.0 - FLAGS.dropout)
-
-    return lstm_fw_cell, lstm_bw_cell
-
-def context_embedding():
+            # forward output and backward output
+            # tf.concat((output[0], output[1]))
+            pdb.set_trace()
+            return output
 
 
+    def attention_flow(self, ):
+        pass
 
-# Attention Flow layer
-# Modeling layer
-# Multi layer Perceptron
-# assemble graph
-# training operation
-# loss operation
+    def modeling_layer(self, ):
+        pass
+
+    def output_layer(self, ):
+        pass
+
+    def build_model(self, ):
+        ### building total graph
+        self.cont_word = tf.placeholder(tf.int32, [self.config.batch_size, self.config.max_cont])
+        self.ques_word = tf.placeholder(tf.int32, [self.config.batch_size, self.config.max_ques])
+        self.cont_char = tf.placeholder(tf.int32, [self.config.batch_size, self.config.max_cont, self.config.max_cont_char])
+        self.ques_char = tf.placeholder(tf.int32, [self.config.batch_size, self.config.max_ques, self.config.max_ques_char])
+
+        ### Word Embedding Layer
+        cont_glove = self.word_embedding(self.cont_word, scope="context_word_emb")  # (32, 791, 300)
+        ques_glove = self.word_embedding(self.ques_word, scope="question_word_emb") # (32, 60, 300)
+
+        ### Character Embedding Layer
+        cont_char = self.char_embedding(self.cont_char, is_query=False, scope="context_char_emb") # (32, 791, 525)
+        ques_char = self.char_embedding(self.ques_char, is_query=True, scope="question_char_emb") # (32, 60, 525)
+
+        ### make list to concat word embedding vector and character embedding vector
+        cont_concat = tf.concat([cont_glove, cont_char], axis=2)  # (32, 791, 825)
+        ques_concat = tf.concat([ques_glove, ques_char], axis=2)  # (32, 60, 825)
+
+        ### Highway network get dimension d
+        cont_highway = self.highway(cont_concat, bias=-2.0, scope="context_highway_net")
+        ques_highway = self.highway(ques_concat, bias=-2.0, scope="question_highway_net")
+
+        ### Contextual Embedding Layer
+        cont_output = self.context_embedding(cont_highway, scope="context_cont")
+        ques_output = self.context_embledding(ques_highway, scope="context_ques")
+
+        ### Attention Flow Layer
+
+        ### Modeling Layer
+
+        ### Output Layer
+
+
+# for sanity check
+def main():
+    config = get_args()
+    dataset = Squad_Dataset(config)
+    model = BIDAF(config, dataset.word_idx2vec)
+
+if __name__ == "__main__":
+    main()

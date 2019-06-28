@@ -23,6 +23,7 @@ class Squad_Dataset():
         self._get_batch()
 
     def clean_str(self, text):
+        ### preprocessing the context or question or answer
         text = re.sub('<br>', '', text)
         text = re.sub('</b>', '', text)
         text = re.sub(':', ' :', text)
@@ -45,12 +46,15 @@ class Squad_Dataset():
         text = re.sub(r'\>', ' >', text)
         return text
 
-    # load glove and squad data
+
     def _load(self, ):
+        ### load glove and squad data
         with open(self.config.train_dir + self.config.train_file, 'r') as fp:
             self.train_file = json.load(fp)['data']
         with open(self.config.train_dir + self.config.dev_file, 'r') as fp:
             self.dev_file = json.load(fp)['data']
+        with open(self.config.glove_dir + self.config.glove_dict, 'rb') as fp:
+            self.glove_file = pickle.load(fp)
 
     def _read(self, ):
 
@@ -144,8 +148,19 @@ class Squad_Dataset():
                 # make fake answer-question pair data
                 # TODO
 
-    ### search max number of each dataset to use at max padding
+        # make glove table with word2idx
+        self.word_idx2vec = np.zeros([len(self.word2idx), 300], dtype=np.float32)
+
+        for word, idx in self.word2idx.items():
+            try:
+                self.word_idx2vec[idx, :] = self.glove_file[word]
+            except KeyError as e:
+                self.word_idx2vec[idx, :] = self.glove_file['unk']
+
+        print ('char2idx number: ', len(self.char2idx))
+
     def _max_num_find(self,):
+        ### search max number of each dataset to use at max padding
         max_question = 0
         max_context = 0
         max_context_char = 0
@@ -167,11 +182,12 @@ class Squad_Dataset():
                 if max_question_char < len(self.train_data[idx]['question_char'][ques_idx]):
                     max_question_char = len(self.train_data[idx]['question_char'][ques_idx])
 
-    ### make numpy data & max padding in question, context and answer
-    def _make_numpy(self,):
 
+    def _make_numpy(self,):
+        ### make numpy data & max padding in question, context and answer
         ans_start = list()
         ans_stop  = list()
+
         # batch_size, word, word_dim
         # batch_size, word, char, char_dim
         ques_mat = np.zeros((len(self.train_data), self.config.max_ques), dtype=np.int32)
@@ -224,8 +240,9 @@ class Squad_Dataset():
         print ('answer start matrix shape: ', self.ans_start.shape)
         print ('answer stop matrix shape: ', self.ans_stop.shape)
 
-    ### get batch dataset
+
     def _get_batch(self, ):
+        ### get batch dataset
         self.ques_mat = list(self.ques_mat)
         self.cont_mat = list(self.cont_mat)
         self.ques_char_mat = list(self.ques_char_mat)
@@ -236,6 +253,7 @@ class Squad_Dataset():
         self.zip_list = list(zip(self.ques_mat, self.cont_mat, self.ques_char_mat, self.cont_char_mat, self.ans_start, self.ans_stop))
 
     def _iter(self, ):
+        ### iteration used at train.py
         for ques, cont, ques_char, cont_char, ans_start, ans_stop in self.zip_list:
             yield ques, cont, ques_char, cont_char, ans_start, ans_stop
 
