@@ -1,5 +1,6 @@
 import os
 import re
+import pdb
 import json
 import pickle
 import pprint
@@ -46,6 +47,8 @@ class Squad_Dataset():
         text = re.sub(r'\>', ' >', text)
         return text
 
+    ### TODO ###
+    # PTB tokenizer (regular-expression-based word tokenizer)
 
     def _load(self, ):
         ### load glove and squad data
@@ -224,6 +227,9 @@ class Squad_Dataset():
         ans_start = np.array(ans_start[:reduced_size * self.config.batch_size], dtype=np.int32)
         ans_stop  = np.array(ans_stop[:reduced_size * self.config.batch_size], dtype=np.int32)
 
+        ans_start_onehot = np.eye(self.max_cont)[ans_start]
+        ans_stop_onehot  = np.eye(self.max_ques)[ans_stop]
+
         ### make input data as batch shape
         self.ques_mat = np.reshape(ques_mat, [reduced_size, self.config.batch_size, -1])
         self.cont_mat = np.reshape(cont_mat, [reduced_size, self.config.batch_size, -1])
@@ -231,7 +237,7 @@ class Squad_Dataset():
         self.cont_char_mat = np.reshape(cont_char_mat, [reduced_size, self.config.batch_size, self.config.max_cont, self.config.max_cont_char])
         self.ans_start = np.reshape(ans_start, [reduced_size, self.config.batch_size])
         self.ans_stop = np.reshape(ans_stop, [reduced_size, self.config.batch_size])
-
+        pdb.set_trace()
         print ()
         print ('question_matrix shape: ', self.ques_mat.shape)
         print ('context_matrix shape: ', self.cont_mat.shape)
