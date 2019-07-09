@@ -1,4 +1,6 @@
+import pdb
 import tensorflow as tf
+import numpy as np
 
 from model import BIDAF
 from preprocess import Squad_Dataset
@@ -22,20 +24,20 @@ class Trainer():
         for epoch in range(self.config.epochs):
             print (" -------------------- Epoch %d is ongoing -------------------- \n")
             for train_idx, (ques, cont, ques_char, cont_char, ans_start, ans_stop) in enumerate(self.zip_list):
-                loss, ema, global_step = self.train_step(ques, cont, ques_char, cont_char, ans_start, ans_stop)
+                loss, global_step = self.train_step(ques, cont, ques_char, cont_char, ans_start, ans_stop)
 
-                tr_loss.append(loss)
-                tr_ema.append(ema)
+                tr_loss.append(np.mean(loss))
+                # tr_ema.append(ema)
 
                 if (train_idx+1) % self.config.print_step == 0:
-                    print ('Epoch %d loss : %.4f \t ema : %.4f\n' % (epoch, loss, ema))
+                    print ('Epoch %d, train_step %d: loss : %.4f \n' % (epoch, train_idx, np.mean(loss)))
 
     def train_step(self, ques, cont, ques_char, cont_char, ans_start, ans_stop):
         feed_dict = self.create_feed_dict(ques, cont, ques_char, cont_char, ans_start, ans_stop)
-        _, loss, ema, global_step = self.sess.run([self.model.train_opt, self.model.loss, self.model.ema, self.global_step], \
+        _, loss , global_step = self.sess.run([self.model.train_opt, self.model.loss, self.global_step], \
                                                     feed_dict=feed_dict)
 
-        return loss, ema, global_step
+        return loss, global_step
 
     def create_feed_dict(self, ques, cont, ques_char, cont_char, ans_start, ans_stop):
         if self.config.mode == 'train':

@@ -179,7 +179,7 @@ class BIDAF():
             ### get start probability
             p1_w = tf.get_variable("start_output_weight", [10 * self.output_dim, 1], dtype=tf.float32)
             att_model_concat = tf.reshape(tf.concat((att_output, model_output), axis=2), [-1, 10*self.output_dim])
-            self.att_model_linear = tf.reshape(tf.matmul(att_model_concat, p1_w), [self.config.batch_size, -1])
+            self.att_model_linear = tf.reshape(tf.matmul(att_model_concat, p1_w), [self.config.batch_size, -1]) # (batch, 791)
             # p1 = tf.nn.softmax(att_model_linear, axis=1)
             p1 = tf.nn.softmax(self.att_model_linear)
             pred1 = tf.argmax(self.att_model_linear, axis=-1)
@@ -198,7 +198,7 @@ class BIDAF():
             output, _ = tf.nn.bidirectional_dynamic_rnn(fw_cell, bw_cell, model_output, time_major=True, dtype=tf.float32)
             new_model_output = tf.concat((output[0], output[1]), axis=2)
             att_new_concat = tf.reshape(tf.concat((att_output, new_model_output), axis=2), [-1, 10*self.output_dim])
-            self.att_new_linear = tf.reshape(tf.matmul(att_new_concat, p2_w), [self.config.batch_size, -1])
+            self.att_new_linear = tf.reshape(tf.matmul(att_new_concat, p2_w), [self.config.batch_size, -1]) # (batch, 791)
 
             # p2 = tf.nn.softmax(att_new_linear, axis=1)
             p2 = tf.nn.softmax(self.att_new_linear)
@@ -217,8 +217,8 @@ class BIDAF():
         self.ques_word = tf.placeholder(tf.int32, [self.config.batch_size, self.config.max_ques])
         self.cont_char = tf.placeholder(tf.int32, [self.config.batch_size, self.config.max_cont, self.config.max_cont_char])
         self.ques_char = tf.placeholder(tf.int32, [self.config.batch_size, self.config.max_ques, self.config.max_ques_char])
-        self.answer_start = tf.placeholder(tf.int32, [self.config.batch_size, None, None])
-        self.answer_stop  = tf.placeholder(tf.int32, [self.config.batch_size, None, None])
+        self.answer_start = tf.placeholder(tf.int32, [self.config.batch_size, self.config.max_cont])
+        self.answer_stop  = tf.placeholder(tf.int32, [self.config.batch_size, self.config.max_cont])
 
         ### Word Embedding Layer
         cont_glove = self.word_embedding(self.cont_word, scope="context_word_emb")  # (32, 791, 300)
@@ -251,32 +251,47 @@ class BIDAF():
         model_output = self.modeling_layer(att_output, scope="modeling_layer") # (32, 791, 825 * 2)
 
         ### Output Layer
-        self.prob1, self.prob2, self.pred1, self.pred2= self.output_layer(att_output, model_output, scope="output_layer")     # (32, 791), (32, 791)
+        prob1, prob2, self.pred1, self.pred2= self.output_layer(att_output, model_output, scope="output_layer")     # (32, 791), (32, 791)
 
         with tf.variable_scope("global_step"):
             self.global_step = tf.get_variable('global_step', shape=[], dtype=tf.int32, initializer=tf.constant_initializer(0), trainable=False)
             self.ema = tf.train.ExponentialMovingAverage(self.config.decay_rate)
 
         with tf.name_scope("loss"):
-            cont, ques = self.att_model_linear.get_shape()
-            self.loss_p1 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf.cast(tf.reshape(self.answer_start, [-1, cont*ques]), 'float'), \
+            self.loss_p1 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf.cast(self.answer_start, 'float'), \
                                                                         logits=self.att_model_linear)
             self.cross_entropy_p1 = tf.reduce_mean(self.loss_p1)
-            self.loss_p2 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf.cast(tf.reshape(self.answer_stop, [-1, cont*ques]), 'float'), \
+            self.loss_p2 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf.cast(self.answer_stop, 'float'), \
                                                                         logits=self.att_new_linear)
             self.cross_entropy_p2 = tf.reduce_mean(self.loss_p2)
+            
             self.loss = tf.add(self.loss_p1, self.loss_p2)
+            self.cross_entropy = tf.add(self.cross_entropy_p1 + self.cross_entropy_p2)
 
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops):
-                self.train_opt = tf.train.AdadeltaOptimizer(self.config.lr).minimize(self.cross_entropy_p1 + self.cross_entropy_p2, global_step=self.global_step)
+                self.train_opt = tf.train.AdadeltaOptimizer(self.config.lr).minimize(self.cross_entropy, global_step=self.global_step)
 
-            # check the predicting index
-            # cor_pred1 = tf.equal(tf.cast(self.pred1, 'tf.int32'), self.answer_start)
-            # cor_pred2 = tf.equal(tf.cast(self.pred2, 'tf.int32'), self.answer_stop)
-            #
-            # self.acc_pred1 = tf.reduce_mean(tf.cast(cor_pred1, tf.float32))
-            # self.acc_pred2 = tf.reduce_mean(tf.cast(cor_pred2, tf.float32))
+        # check the predicting index
+        # start_idx = tf.argmax(self.answer_start, axis=-1)
+        # stop_idx  = tf.argmax(self.answer_stop, axis=-1)
+
+        # cor_pred1 = tf.equal(pred1, start_idx)
+        # cor_pred2 = tf.equal(pred2, stop_idx)
+        #
+        # self.acc_pred1 = tf.reduce_mean(tf.cast(cor_pred1, tf.float32))
+        # self.acc_pred2 = tf.reduce_mean(tf.cast(cor_pred2, tf.float32))
+
+        # make f1 score
+        # acc1 = tf.metrics.accuracy(labels=start_idx, predictions=pred1)
+        # acc2 = tf.metrics.accuracy(labels=stop_idx, predictions=pred2)
+        #
+        # prec1 = tf.metrics.precision(labels=start_idx, predictions=pred1)
+        # prec2 = tf.metrics.precision(labels=stop_idx, predictions=pred2)
+        #
+        # rec1 = tf.metrics.recall(labels=start_idx, predictions=pred1)
+        # rec2 = tf.metrics.recall(labels=stop_idx, predictions=pred2)
+        # pdb.set_trace()
 
     def model_summary(self, ):
         model_vars = tf.trainable_variables()

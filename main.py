@@ -29,7 +29,11 @@ def main():
 
     if config.mode == 'train':
         trainer = Trainer(config, dataset, model, sess)
-        trainer.train()
+        # evaluator = Evaluator(config, dataset, model, sess)
+    trainer.train()
+
+    # load best trainer during evaluation
+    # needs evaluation code
 
 if __name__ == "__main__":
     main()

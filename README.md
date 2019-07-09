@@ -1,10 +1,14 @@
 # BIDAF
 Reimplementation Bi-Directional Attention Flow for Machine Comprehension
 
-Modifying model architecture to solve Multi-Sentence Reading Comprehension dataset
+First of all, re-implement the BIDAF model with SQuAD dataset
+
+and then, modifying model architecture to solve Multi-Sentence Reading Comprehension dataset
 
 # Dataset
-Multi-Sentence Reading Comprehension dataset (Multi-RC)
+(1) SQuAD dataset v1.1
+
+(2) Multi-Sentence Reading Comprehension dataset (Multi-RC)
 1. ~6k high-quality multiple-choice RC questions
 2. 7 different sources, allowing more diversity in content, style, and possible question types.
 3. Questions aren't constrained in single correct answer.
