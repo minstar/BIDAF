@@ -231,7 +231,7 @@ class BIDAF():
         ### make list to concat word embedding vector and character embedding vector
         cont_concat = tf.concat([cont_glove, cont_char], axis=2)  # (32, 791, 825)
         ques_concat = tf.concat([ques_glove, ques_char], axis=2)  # (32, 60, 825)
-        self.output_dim = cont_concat.get_shape()[2]
+        self.output_dim = cont_concat.get_shape()[2] # (400)
 
         ### Highway network get dimension d
         cont_highway = self.highway(cont_concat, bias=-2.0, scope="context_highway_net")
@@ -264,9 +264,9 @@ class BIDAF():
             self.loss_p2 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf.cast(self.answer_stop, 'float'), \
                                                                         logits=self.att_new_linear)
             self.cross_entropy_p2 = tf.reduce_mean(self.loss_p2)
-            
+
             self.loss = tf.add(self.loss_p1, self.loss_p2)
-            self.cross_entropy = tf.add(self.cross_entropy_p1 + self.cross_entropy_p2)
+            self.cross_entropy = tf.add(self.cross_entropy_p1, self.cross_entropy_p2)
 
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops):

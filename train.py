@@ -7,11 +7,12 @@ from preprocess import Squad_Dataset
 from config import get_args
 
 class Trainer():
-    def __init__(self, config, data, model, sess):
+    def __init__(self, config, data, model, saver, sess):
         self.config = config
         self.data = data
         self.model = model
         self.sess = sess
+        self.saver = saver
 
         self.loss = self.model.loss
         self.train_opt = self.model.train_opt
@@ -31,6 +32,16 @@ class Trainer():
 
                 if (train_idx+1) % self.config.print_step == 0:
                     print ('Epoch %d, train_step %d: loss : %.4f \n' % (epoch, train_idx, np.mean(loss)))
+
+                ### save evaluation model
+                if tr_loss[train_idx-1] - tr_loss[train_idx] > self.config.loss_diff and train_idx > 1:
+                    print ("Save training model, loss difference is larger than %.2f, %.2f, %.2f\n"%(self.config.loss_diff, tr_loss[train_idx-1], tr_loss[train_idx]))
+                    self.saver.save(self.sess, self.config.save_dir)
+
+    def evaluate(self, ):
+        dev_loss = []
+        pass
+
 
     def train_step(self, ques, cont, ques_char, cont_char, ans_start, ans_stop):
         feed_dict = self.create_feed_dict(ques, cont, ques_char, cont_char, ans_start, ans_stop)

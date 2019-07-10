@@ -80,9 +80,13 @@ class Squad_Dataset():
         self.idx2word[1] = 'unk'
         answer_mismatch = 0
         # context_maxlen = 0
+        if self.config.mode == 'train':
+            file_name = self.train_file
+        elif self.config.mode == 'dev':
+            file_name = self.dev_file
 
-        for idx in range(len(self.train_file)):
-            paragraphs = self.train_file[idx]['paragraphs']
+        for idx in range(len(file_name)):
+            paragraphs = file_name[idx]['paragraphs']
             for par_idx, paragraph in enumerate(paragraphs):
                 context_list = list()
                 context_char_list = list()

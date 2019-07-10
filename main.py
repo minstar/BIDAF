@@ -26,13 +26,18 @@ def main():
     sess.run(init)
 
     model.model_summary()
+    loader = tf.train.Saver(max_to_keep=None)
 
     if config.mode == 'train':
-        trainer = Trainer(config, dataset, model, sess)
+        trainer = Trainer(config, dataset, model, loader, sess)
         # evaluator = Evaluator(config, dataset, model, sess)
+
     trainer.train()
 
     # load best trainer during evaluation
+    print ("load latest evaluation model\n")
+    # loader.restore(sess, tf.train.latest_checkpoint(os.path.join(config.save_dir, exp_name)))
+
     # needs evaluation code
 
 if __name__ == "__main__":
