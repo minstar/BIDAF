@@ -1,11 +1,14 @@
 import os, pdb
+import random
 import numpy as np
 import tensorflow as tf
 
+from model import BIDAF
 from train import Trainer
 from config import get_args
+from evaluate import *
 from preprocess import Squad_Dataset
-from model import BIDAF
+
 
 def main():
     config = get_args()
@@ -30,15 +33,13 @@ def main():
 
     if config.mode == 'train':
         trainer = Trainer(config, dataset, model, loader, sess)
-        # evaluator = Evaluator(config, dataset, model, sess)
-
-    trainer.train()
-
-    # load best trainer during evaluation
-    print ("load latest evaluation model\n")
-    # loader.restore(sess, tf.train.latest_checkpoint(os.path.join(config.save_dir, exp_name)))
-
-    # needs evaluation code
+        trainer.train()
+    elif config.mode == 'dev':
+        # load best trainer for testing
+        print ("restore latest evaluation model\n")
+        loader.restore(sess, tf.train.latest_checkpoint(os.path.join(config.save_dir, exp_name)))
+        trainer = Trainer(config, dataset, model, loader, sess)
+        trainer.train()
 
 if __name__ == "__main__":
     main()
