@@ -22,6 +22,7 @@ class Squad_Dataset():
         self._read()
         self._make_numpy()
         self._get_batch()
+        # self._make_as_file()
 
     def clean_str(self, text):
         ### preprocessing the context or question or answer
@@ -52,12 +53,12 @@ class Squad_Dataset():
 
     def _load(self, ):
         ### load glove and squad data
-        with open(self.config.train_dir + self.config.train_file, 'r') as fp:
-            self.train_file = json.load(fp)['data']
+        # with open(self.config.train_dir + self.config.train_file, 'r') as fp:
+        #     self.train_file = json.load(fp)['data']
         with open(self.config.train_dir + self.config.dev_file, 'r') as fp:
             self.dev_file = json.load(fp)['data']
-        with open(self.config.glove_dir + self.config.glove_dict, 'rb') as fp:
-            self.glove_file = pickle.load(fp)
+        # with open(self.config.glove_dir + self.config.glove_dict, 'rb') as fp:
+        #     self.glove_file = pickle.load(fp)
 
     def _seq2seq(self, subseq, totseq):
         ### find answer token in context
@@ -80,9 +81,9 @@ class Squad_Dataset():
         self.idx2word[1] = 'unk'
         answer_mismatch = 0
         # context_maxlen = 0
-        if self.config.mode == 'train':
+        if self.config.is_train == 'True':
             file_name = self.train_file
-        elif self.config.mode == 'dev':
+        else:
             file_name = self.dev_file
 
         for idx in range(len(file_name)):
@@ -120,16 +121,12 @@ class Squad_Dataset():
 
                 # qas
                 for qas_idx in range(len(qas)):
-                    self.train_data[train_idx] = dict()
                     question_list = list()
-                    answer_list = list()
                     question_char_list = list()
 
                     question = self.clean_str(qas[qas_idx]['question'].lower())
-                    answer = self.clean_str(qas[qas_idx]['answers'][0]['text'].lower())
-
                     ques_tokens = question.split()
-                    ans_tokens = answer.split()
+                    qa_id = qas[qas_idx]['id']
 
                     for ques_token in ques_tokens:
                         char_list = list()
@@ -139,7 +136,6 @@ class Squad_Dataset():
                             self.idx2word[len(self.word2idx)-1] = ques_token
 
                         question_list.append(self.word2idx[ques_token])
-
                         # make question into character tokens
                         for char_token in ques_token:
                             if char_token not in self.char2idx:
@@ -150,55 +146,56 @@ class Squad_Dataset():
 
                         question_char_list.append(char_list)
 
-                    # make answer label
-                    for ans_token in ans_tokens:
-                        if ans_token not in self.word2idx:
-                            # print ("# --------------- answer is not in the context ---------------# \n")
-                            self.word2idx[ans_token] = len(self.word2idx)
-                            self.idx2word[len(self.word2idx)-1] = ans_token
+                    for ans_idx in range(len(qas[qas_idx]['answers'])):
+                        self.train_data[train_idx] = dict()
+                        answer_list = list()
+                        answer = self.clean_str(qas[qas_idx]['answers'][ans_idx]['text'].lower())
+                        ans_tokens = answer.split()
 
-                        answer_list.append(self.word2idx[ans_token])
-                        # for char_token in ans_token:
-                        #     if char_token not in self.char2idx:
-                        #         self.char2idx[char_token] = len(self.char2idx)
-                        #         self.idx2char[len(self.char2idx)-1] = char_token
-                        #
-                        #     answer_list.append(self.char2idx[char_token])
+                        # make answer label
+                        for ans_token in ans_tokens:
+                            if ans_token not in self.word2idx:
+                                self.word2idx[ans_token] = len(self.word2idx)
+                                self.idx2word[len(self.word2idx)-1] = ans_token
 
-                    answer_start = self._seq2seq(answer_list, context_list)
-                    answer_stop  = answer_start + len(answer_list)
+                            answer_list.append(self.word2idx[ans_token])
 
-                    if answer_start >= self.config.max_cont or answer_stop >= self.config.max_cont:
-                        continue
+                        answer_start = self._seq2seq(answer_list, context_list)
+                        answer_stop  = answer_start + len(answer_list)
 
-                    if answer_start == -1:
-                        answer_mismatch += 1
-                        continue
+                        if answer_start >= self.config.max_cont or answer_stop >= self.config.max_cont:
+                            continue
 
-                    # --------------- make question and answer pair --------------- #
-                    self.train_data[train_idx]['question'] = question_list  # make train data with question index
-                    self.train_data[train_idx]['context'] = context_list    # make train data with context index
-                    self.train_data[train_idx]['answer'] = answer_list      # make train data with answer index
-                    self.train_data[train_idx]['question_char'] = question_char_list
-                    self.train_data[train_idx]['context_char'] = context_char_list
-                    self.train_data[train_idx]['answer_start'] = answer_start
-                    self.train_data[train_idx]['answer_stop'] = answer_stop
+                        if answer_start == -1:
+                            answer_mismatch += 1
+                            continue
 
-                    train_idx += 1
+                        # --------------- make question and answer pair --------------- #
+                        self.train_data[train_idx]['question'] = question_list  # make train data with question index
+                        self.train_data[train_idx]['context'] = context_list    # make train data with context index
+                        self.train_data[train_idx]['answer'] = answer_list      # make train data with answer index
+                        self.train_data[train_idx]['question_char'] = question_char_list
+                        self.train_data[train_idx]['context_char'] = context_char_list
+                        self.train_data[train_idx]['answer_start'] = answer_start
+                        self.train_data[train_idx]['answer_stop'] = answer_stop
+                        self.train_data[train_idx]['id'] = qa_id
+
+                        train_idx += 1
 
                 # make fake answer-question pair data
                 # TODO
+
         print ("answer mismatch number",  answer_mismatch)
         # print ("context maxlength", context_maxlen)
 
         # make glove table with word2idx
         self.word_idx2vec = np.zeros([len(self.word2idx), 300], dtype=np.float32)
 
-        for word, idx in self.word2idx.items():
-            try:
-                self.word_idx2vec[idx, :] = self.glove_file[word]
-            except KeyError as e:
-                self.word_idx2vec[idx, :] = self.glove_file['unk']
+        # for word, idx in self.word2idx.items():
+        #     try:
+        #         self.word_idx2vec[idx, :] = self.glove_file[word.lower()]
+        #     except KeyError as e:
+        #         self.word_idx2vec[idx, :] = self.glove_file['unk']
 
         print ('char2idx number: ', len(self.char2idx))
 
@@ -227,8 +224,7 @@ class Squad_Dataset():
 
     def _make_numpy(self,):
         ### make numpy data & max padding in question, context and answer
-        ans_start = list()
-        ans_stop  = list()
+        ans_start, ans_stop, qa_id = [], [], []
 
         # batch_size, word, word_dim
         # batch_size, word, char, char_dim
@@ -260,6 +256,7 @@ class Squad_Dataset():
 
             ans_start.append(self.train_data[idx]['answer_start'])
             ans_stop.append(self.train_data[idx]['answer_stop'])
+            qa_id.append(self.train_data[idx]['id'])
 
         reduced_size = len(self.train_data) // self.config.batch_size
 
@@ -269,6 +266,7 @@ class Squad_Dataset():
         cont_char_mat = cont_char_mat[:reduced_size * self.config.batch_size]
         ans_start = np.array(ans_start[:reduced_size * self.config.batch_size], dtype=np.int32)
         ans_stop  = np.array(ans_stop[:reduced_size * self.config.batch_size], dtype=np.int32)
+        qa_id = np.array(qa_id[:reduced_size * self.config.batch_size])
 
         ans_start = np.eye(self.config.max_cont)[ans_start]
         ans_stop  = np.eye(self.config.max_cont)[ans_stop]
@@ -280,6 +278,7 @@ class Squad_Dataset():
         self.cont_char_mat = np.reshape(cont_char_mat, [reduced_size, self.config.batch_size, self.config.max_cont, self.config.max_cont_char])
         self.ans_start = np.reshape(ans_start, [reduced_size, self.config.batch_size, self.config.max_cont])
         self.ans_stop = np.reshape(ans_stop, [reduced_size, self.config.batch_size, self.config.max_cont])
+        self.qa_id = np.reshape(qa_id, [reduced_size, self.config.batch_size])
 
         print ()
         print ('question_matrix shape: ', self.ques_mat.shape)
@@ -288,7 +287,7 @@ class Squad_Dataset():
         print ('context_char_matrix shape: ', self.cont_char_mat.shape)
         print ('answer start matrix shape: ', self.ans_start.shape)
         print ('answer stop matrix shape: ', self.ans_stop.shape)
-
+        print ('number of question id: ', self.qa_id.shape)
 
     def _get_batch(self, ):
         ### get batch dataset
@@ -298,8 +297,17 @@ class Squad_Dataset():
         cont_char_mat = list(self.cont_char_mat)
         ans_start = list(self.ans_start)
         ans_stop = list(self.ans_stop)
+        qa_id = list(self.qa_id)
 
-        self.zip_list = list(zip(ques_mat, cont_mat, ques_char_mat, cont_char_mat, ans_start, ans_stop))
+        self.zip_list = list(zip(ques_mat, cont_mat, ques_char_mat, cont_char_mat, ans_start, ans_stop, qa_id))
+
+    def _make_as_file(self, ):
+        if self.config.is_train == 'True':
+            with open('tr_zip_list.pkl', 'wb') as fp:
+                pickle.dump(self.zip_list, fp)
+        else:
+            with open('dev_zip_list.pkl', 'wb') as fp:
+                pickle.dump(self.zip_list, fp)
 
     def _iter(self, ):
         ### iteration used at train.py

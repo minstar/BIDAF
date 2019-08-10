@@ -11,10 +11,10 @@ def get_args():
     argp.add_argument('--glove_file', type=str, default='glove.6B.300d.txt')
     argp.add_argument('--glove_dict', type=str, default='glove_dict.pkl')
     argp.add_argument('--save_dir', type=str, default='./out')
+    argp.add_argument('--save_pred', type=str, default='./out/predictions.json')
 
     # data control
-    # argp.add_argument('--kernel_num', type=list, default=[100])
-    # argp.add_argument('--kernel_width', type=list, default=[5])
+    argp.add_argument('--is_train', type=str, default='True')
     argp.add_argument('--max_ques', type=int, default=40)
     argp.add_argument('--max_ques_char', type=int, default=25)
     argp.add_argument('--max_cont', type=int, default=300) # original text is 791
