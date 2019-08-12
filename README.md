@@ -5,6 +5,10 @@ First of all, re-implement the BIDAF model with SQuAD dataset
 
 and then, modifying model architecture to solve Multi-Sentence Reading Comprehension dataset
 
+# Execution
+* python main.py --is_train True # for training your own model
+* python main.py --is_train False # for evaluating your trained model
+
 # Dataset
 (1) SQuAD dataset v1.1
 
