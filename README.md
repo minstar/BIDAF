@@ -7,10 +7,14 @@ and then, modifying model architecture to solve Multi-Sentence Reading Comprehen
 
 # Execution
 For training your own model,
-"python main.py --is_train True"
+```
+python main.py --is_train True
+```
 
 for evaluating your trained model
-"python main.py --is_train False"
+```
+python main.py --is_train False
+```
 
 # Dataset
 (1) SQuAD dataset v1.1
