@@ -6,8 +6,11 @@ First of all, re-implement the BIDAF model with SQuAD dataset
 and then, modifying model architecture to solve Multi-Sentence Reading Comprehension dataset
 
 # Execution
-* python main.py --is_train True # for training your own model
-* python main.py --is_train False # for evaluating your trained model
+For training your own model,
+"python main.py --is_train True"
+
+for evaluating your trained model
+"python main.py --is_train False"
 
 # Dataset
 (1) SQuAD dataset v1.1
@@ -18,8 +21,8 @@ and then, modifying model architecture to solve Multi-Sentence Reading Comprehen
 3. Questions aren't constrained in single correct answer.
 
 # Version Type
-1. tensorflow == 1.9.0
-2. python == 3.6.0
+1. tensorflow version: 1.9.0
+2. python version: 3.6.0
 
 # Reference
 * Model - https://arxiv.org/pdf/1611.01603.pdf
