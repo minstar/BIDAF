@@ -64,14 +64,21 @@ class BIDAF():
 
     def highway(self, input_highway, bias=0.0, scope=None):
         ### Highway network to get interpolation result
-        input_highway = tf.reshape(input_highway, [-1, self.output_dim])
-
+        # with tf.name_scope(scope, reuse=tf.AUTO_REUSE):
         with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
-            for i in range(self.config.highway_layers):
-                t = tf.sigmoid(self.Affine_Transformation(input_highway, self.output_dim, scope='transgate') + bias)
-                g = tf.nn.relu(self.Affine_Transformation(input_highway, self.output_dim, scope='MLP'))
+            # for affine Affine_Transformation
+            w = tf.get_variable(name="highway_matrix", shape=[self.output_dim, input_highway.get_shape()[1]], dtype=tf.float32)
+            b = tf.get_variable(name="highway_bias", shape=[self.output_dim], dtype=tf.float32)
 
-                z = t * g + (1.0 - t) * input_highway
+            input_highway = tf.reshape(input_highway, [-1, self.output_dim])
+
+            for i in range(self.config.highway_layers):
+                # t = tf.sigmoid(self.Affine_Transformation(input_highway, self.output_dim, scope='transgate') + bias)
+                # g = tf.nn.relu(self.Affine_Transformation(input_highway, self.output_dim, scope='MLP'))
+                t = tf.sigmoid(tf.matmul(input_highway, w) + b)
+                g = tf.nn.relu(tf.matmul(input_highway, w) + b)
+
+                z = t * input_highway + (1.0 - t) * g
 
                 if self.config.highway_layers > 1:
                     ### convert next (t+1) highway input to (t) output
@@ -200,8 +207,8 @@ class BIDAF():
 
             new_model_output = tf.concat((output[0], output[1]), axis=2)
 
-            pdb.set_trace()
-            att_new_concat = tf.reshape(tf.concat((att_output, model_output, new_model_output, model_output * new_model_output), axis=2), [-1, 10*self.output_dim])
+            # att_new_concat = tf.reshape(tf.concat((att_output, model_output, new_model_output, model_output * new_model_output), axis=2), [-1, 10*self.output_dim])
+            att_new_concat = tf.reshape(tf.concat((att_output, new_model_output), axis=2), [-1, 10*self.output_dim])
             att_new_linear = tf.reshape(tf.matmul(att_new_concat, p2_w), [self.config.batch_size, -1]) # (batch, 791)
 
             att_new_linear = tf.nn.dropout(att_new_linear, self.keep_prob)
@@ -230,8 +237,8 @@ class BIDAF():
         self.output_dim = cont_concat.get_shape()[2] # (400)
 
         ### Highway network get dimension d
-        cont_highway = self.highway(cont_concat, bias=-2.0, scope="highway_net")
-        ques_highway = self.highway(ques_concat, bias=-2.0, scope="highway_net")
+        cont_highway = self.highway(cont_concat, bias=0.0, scope="highway_net")
+        ques_highway = self.highway(ques_concat, bias=0.0, scope="highway_net")
 
         ### Contextual Embedding Layer
         cont_output = self.context_embedding(cont_highway, scope="context_cont")   # (32, 791, 825 * 2)
