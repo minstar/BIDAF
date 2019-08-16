@@ -10,9 +10,6 @@ import argparse
 import tensorflow as tf
 import numpy as np
 
-from model import BIDAF
-from preprocess import Squad_Dataset
-from config import get_args
 
 def normalize_answer(s):
     """Lower text and remove punctuation, articles and extra whitespace."""
@@ -77,6 +74,8 @@ def evaluate(dataset, predictions):
 
     exact_match = 100.0 * exact_match / total
     f1 = 100.0 * f1 / total
+    print ('exact_match\n', exact_match)
+    print ('f1 score\n', f1)
 
     return {'exact_match': exact_match, 'f1': f1}
 
@@ -88,6 +87,7 @@ if __name__ == '__main__':
     parser.add_argument('dataset_file', help='Dataset file')
     parser.add_argument('prediction_file', help='Prediction File')
     args = parser.parse_args()
+    
     with open(args.dataset_file) as dataset_file:
         dataset_json = json.load(dataset_file)
         if (dataset_json['version'] != expected_version):
