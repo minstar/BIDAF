@@ -27,11 +27,10 @@ class Trainer():
 
         tr_ema, tr_loss = [], []
         for epoch in range(self.config.epochs):
-
             print (" -------------------- Epoch %d is ongoing -------------------- \n" % (epoch))
             for train_idx, (ques, cont_mat, ques_char, cont_char, ans_start, ans_stop, qa_id) in enumerate(self.data.tr_zip_list):
                 # loss, global_step, ce, arg_p1, arg_p2 = self.train_step(ques, cont_mat, ques_char, cont_char, ans_start, ans_stop)
-                loss = self.train_step(ques, cont_mat, ques_char, cont_char, ans_start, ans_stop)
+                loss, prob1, prob2 = self.train_step(ques, cont_mat, ques_char, cont_char, ans_start, ans_stop)
                 # tr_loss.append(ce)
 
                 if (train_idx+1) % self.config.print_step == 0:
@@ -46,16 +45,10 @@ class Trainer():
                 pred1_lst = arg_p1.tolist()
                 pred2_lst = arg_p2.tolist()
                 for index_idx in range(len(pred1_lst)):
-                    answer_str = ''
-                    need_decode = cont_mat[index_idx][pred1_lst[index_idx]:pred2_lst[index_idx]]
-                    for dec_idx in need_decode:
-                        answer_str += ''.join(self.data.idx2word[dec_idx])
-                        answer_str += ' '
-
-                    if answer_str == '':
-                        pred_dict[qa_id[index_idx]] = ''
-                    else:
-                        pred_dict[qa_id[index_idx]] = answer_str[:-1]
+                    # answer_str = ''
+                    need_decode = cont_mat[index_idx][pred1_lst[index_idx]:pred2_lst[index_idx]+1]
+                    answer_str = ' '.join([self.data.idx2word[dec_idx] for dec_idx in need_decode])
+                    pred_dict[qa_id[index_idx]] = answer_str
 
                 if (dev_idx+1) % self.config.print_step == 0:
                     print ('Epoch %d, dev_step %d \n' % (epoch, dev_idx))
@@ -79,14 +72,11 @@ class Trainer():
 
     def train_step(self, ques, cont_mat, ques_char, cont_char, ans_start, ans_stop):
         feed_dict = self.create_feed_dict(ques, cont_mat, ques_char, cont_char, ans_start, ans_stop)
-        loss, _, global_step = self.sess.run([self.loss, self.train_opt, self.global_step], feed_dict=feed_dict)
+        loss, _, global_step, prob1, prob2= self.sess.run([self.loss, self.train_opt, self.global_step, self.model.prob1, self.model.prob2], feed_dict=feed_dict)
         summary = tf.Summary(value=[tf.Summary.Value(tag="loss", simple_value=loss)])
         self.writer.add_summary(summary, global_step)
-        return loss
-        # _, loss, global_step, ce, prob1, prob2 = self.sess.run([self.train_opt, self.loss, self.global_step, \
-        #                                                         self.model.cross_entropy, self.model.arg_p1, self.model.arg_p2], feed_dict=feed_dict)
 
-        # return loss, global_step, ce, prob1, prob2, pr1, pr2
+        return loss, prob1, prob2
 
     def create_feed_dict(self, ques, cont_mat, ques_char, cont_char, ans_start, ans_stop):
         if self.config.mode == 'train':

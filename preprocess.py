@@ -2,12 +2,15 @@ import os
 import re
 import pdb
 import json
+import nltk
 import pickle
 import pprint
 import numpy as np
 
+from nltk.tokenize import word_tokenize
 # for sanity check
 from config import get_args
+from utils import _seq2seq, process_tokens
 
 class Squad_Dataset():
     def __init__(self, config):
@@ -22,44 +25,21 @@ class Squad_Dataset():
         if self.config.is_load == 'True':
             self._load()
             self._read(file_name=self.train_file)
+            self.train_data = self._max_num_find(file_name=self.train_data)
             self.config.mode = 'dev'
             self._read(file_name=self.dev_file)
+            self.dev_data = self._max_num_find(file_name=self.dev_data)
 
         else:
             self._load()
             self._read(file_name=self.train_file)
+            self.train_data = self._max_num_find(file_name=self.train_data)
             self._make_numpy(data_name=self.train_data)
 
             self.config.mode = 'dev'
             self._read(file_name=self.dev_file)
+            self.dev_data = self._max_num_find(file_name=self.dev_data)
             self._make_numpy(data_name=self.dev_data)
-
-    def clean_str(self, text):
-        ### preprocessing the context or question or answer
-        text = re.sub('<br>', '', text)
-        text = re.sub('</b>', '', text)
-        text = re.sub(':', ' :', text)
-        text = re.sub(',', ' ,', text)
-        text = re.sub('"', ' " ', text)
-        text = re.sub(r'\.', ' .', text)
-        text = re.sub(r'\?', ' ?', text)
-        text = re.sub(r'\-', ' - ', text)
-        text = re.sub(r'\(', '( ', text)
-        text = re.sub(r'\)', ' )', text)
-        text = re.sub(r'\'', ' \' ', text)
-        text = re.sub(r'\;', ' ;', text)
-        text = re.sub('n\'t', ' n\'t ', text)
-        text = re.sub(r'\[', '[ ', text)
-        text = re.sub(r'\]', ' ]', text)
-        text = re.sub(r'\!', ' !', text)
-        text = re.sub(r'\{', ' {', text)
-        text = re.sub(r'\}', ' }', text)
-        text = re.sub(r'\<', ' <', text)
-        text = re.sub(r'\>', ' >', text)
-        return text
-
-    ### TODO ###
-    # PTB tokenizer (regular-expression-based word tokenizer)
 
     def _load(self, ):
         ### load glove and squad data
@@ -76,17 +56,6 @@ class Squad_Dataset():
             with open('dev_zip_list.pkl', 'rb') as fp:
                 self.dev_zip_list = pickle.load(fp)
 
-    def _seq2seq(self, subseq, totseq):
-        ### find answer token in context
-        while subseq[0] in totseq:
-            index = totseq.index(subseq[0])
-            if subseq == totseq[index:index + len(subseq)]:
-                return index
-            else:
-                totseq = totseq[index + 1:]
-        else:
-            return -1
-
     def _read(self, file_name=None):
 
         train_idx = 0
@@ -97,17 +66,18 @@ class Squad_Dataset():
         self.word2idx['unk'] = 1
         self.idx2word[1] = 'unk'
         answer_mismatch = 0
-        # context_maxlen = 0
 
         for idx in range(len(file_name)):
             paragraphs = file_name[idx]['paragraphs']
+
             for par_idx, paragraph in enumerate(paragraphs):
                 context_list = list()
                 context_char_list = list()
 
-                context = self.clean_str(paragraph['context'].lower())
+                context = paragraph['context'].replace("''", '" ').replace("``", '" ')
                 qas = paragraph['qas']
-                tokens = context.split()
+                tokens = word_tokenize(context)
+                # tokens = process_tokens(tokens)
 
                 # context
                 for token in tokens:
@@ -133,8 +103,8 @@ class Squad_Dataset():
                     question_list = list()
                     question_char_list = list()
 
-                    question = self.clean_str(qas[qas_idx]['question'].lower())
-                    ques_tokens = question.split()
+                    question = qas[qas_idx]['question'].replace("''", '" ').replace("``", '" ')
+                    ques_tokens = word_tokenize(question)
                     qa_id = qas[qas_idx]['id']
 
                     for ques_token in ques_tokens:
@@ -156,11 +126,9 @@ class Squad_Dataset():
                         question_char_list.append(char_list)
 
                     for ans_idx in range(len(qas[qas_idx]['answers'])):
-                        self.train_data[train_idx] = dict()
-                        self.dev_data[dev_idx] = dict()
                         answer_list = list()
-                        answer = self.clean_str(qas[qas_idx]['answers'][ans_idx]['text'].lower())
-                        ans_tokens = answer.split()
+                        answer = qas[qas_idx]['answers'][ans_idx]['text']
+                        ans_tokens = word_tokenize(answer)
 
                         # make answer label
                         for ans_token in ans_tokens:
@@ -170,31 +138,31 @@ class Squad_Dataset():
 
                             answer_list.append(self.word2idx[ans_token])
 
-                        answer_start = self._seq2seq(answer_list, context_list)
+                        answer_start = _seq2seq(answer_list, context_list)
                         answer_stop  = answer_start + len(answer_list)
-
-                        if answer_start >= self.config.max_cont or answer_stop >= self.config.max_cont:
-                            continue
 
                         if answer_start == -1:
                             answer_mismatch += 1
-                            continue
+                            break
+
+                        self.train_data[train_idx] = dict()
+                        self.dev_data[dev_idx] = dict()
 
                         # --------------- make question and answer pair --------------- #
                         if 'train' in self.config.mode:
+
                             self.train_data[train_idx]['question'] = question_list  # make train data with question index
                             self.train_data[train_idx]['context'] = context_list    # make train data with context index
-                            self.train_data[train_idx]['answer'] = answer_list      # make train data with answer index
                             self.train_data[train_idx]['question_char'] = question_char_list
                             self.train_data[train_idx]['context_char'] = context_char_list
                             self.train_data[train_idx]['answer_start'] = answer_start
                             self.train_data[train_idx]['answer_stop'] = answer_stop
                             self.train_data[train_idx]['id'] = qa_id
                             train_idx += 1
+
                         elif 'dev' in self.config.mode:
                             self.dev_data[dev_idx]['question'] = question_list  # make train data with question index
                             self.dev_data[dev_idx]['context'] = context_list    # make train data with context index
-                            self.dev_data[dev_idx]['answer'] = answer_list      # make train data with answer index
                             self.dev_data[dev_idx]['question_char'] = question_char_list
                             self.dev_data[dev_idx]['context_char'] = context_char_list
                             self.dev_data[dev_idx]['answer_start'] = answer_start
@@ -203,7 +171,6 @@ class Squad_Dataset():
                             dev_idx += 1
 
         print ("answer mismatch number",  answer_mismatch)
-        # print ("context maxlength", context_maxlen)
 
         # make glove table with word2idx
         self.word_idx2vec = np.zeros([len(self.word2idx), 300], dtype=np.float32)
@@ -213,34 +180,24 @@ class Squad_Dataset():
                 continue
             else:
                 try:
-                    self.word_idx2vec[idx, :] = self.glove_file[word.lower()]
+                    self.word_idx2vec[idx, :] = self.glove_file[word]
                 except KeyError as e:
                     self.word_idx2vec[idx, :] = self.glove_file['unk']
 
         print ('char2idx number: ', len(self.char2idx))
 
-    def _max_num_find(self,):
+    def _max_num_find(self, file_name):
         ### search max number of each dataset to use at max padding
-        max_question = 0
-        max_context = 0
-        max_context_char = 0
-        max_question_char = 0
+        file_name = [file_name[i] for i in range(len(file_name)) if len(file_name[i]['context']) <= self.config.max_cont]
+        # stop_answer = 0
+        #
+        # for idx in range(len(file_name)):
+        #     if file_name[idx]['answer_stop'] > self.config.max_cont:
+        #         stop_answer += 1
+        #
+        # print (stop_answer)
 
-        for idx in range(len(self.train_data)):
-
-            if max_question < len(self.train_data[idx]['question']):
-                max_question = len(self.train_data[idx]['question'])
-
-            if max_context < len(self.train_data[idx]['context']):
-                max_context = len(self.train_data[idx]['context'])
-
-            for context_idx in range(len(self.train_data[idx]['context_char'])):
-                if max_context_char < len(self.train_data[idx]['context_char'][context_idx]):
-                    max_context_char = len(self.train_data[idx]['context_char'][context_idx])
-
-            for ques_idx in range(len(self.train_data[idx]['question_char'])):
-                if max_question_char < len(self.train_data[idx]['question_char'][ques_idx]):
-                    max_question_char = len(self.train_data[idx]['question_char'][ques_idx])
+        return file_name
 
     def _make_numpy(self, data_name=None):
         ### make numpy data & max padding in question, context and answer

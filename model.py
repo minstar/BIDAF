@@ -65,18 +65,20 @@ class BIDAF():
     def highway(self, input_highway, bias=0.0, scope=None):
         ### Highway network to get interpolation result
         # with tf.name_scope(scope, reuse=tf.AUTO_REUSE):
+
         with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
             # for affine Affine_Transformation
+            input_highway = tf.reshape(input_highway, [-1, self.output_dim])
+
             w = tf.get_variable(name="highway_matrix", shape=[self.output_dim, input_highway.get_shape()[1]], dtype=tf.float32)
             b = tf.get_variable(name="highway_bias", shape=[self.output_dim], dtype=tf.float32)
 
-            input_highway = tf.reshape(input_highway, [-1, self.output_dim])
-
+            tf.get_variable_scope().reuse_variables()
             for i in range(self.config.highway_layers):
                 # t = tf.sigmoid(self.Affine_Transformation(input_highway, self.output_dim, scope='transgate') + bias)
                 # g = tf.nn.relu(self.Affine_Transformation(input_highway, self.output_dim, scope='MLP'))
                 t = tf.sigmoid(tf.matmul(input_highway, w) + b)
-                g = tf.nn.relu(tf.matmul(input_highway, w) + b)
+                g = tf.nn.relu(tf.matmul(input_highway, w))
 
                 z = t * input_highway + (1.0 - t) * g
 
@@ -191,7 +193,9 @@ class BIDAF():
             att_model_linear = tf.reshape(tf.matmul(att_model_concat, p1_w), [self.config.batch_size, -1]) # (batch, 791)
 
             att_model_linear = tf.nn.dropout(att_model_linear, self.keep_prob)
+            # att_model_linear = tf.nn.log_softmax(att_model_linear)
             arg_p1 = tf.argmax(tf.nn.softmax(att_model_linear), axis=1)
+
             ### get end probability
             p2_w = tf.get_variable("end_output_weight", [10*self.output_dim, 1], dtype=tf.float32)
             fw_cells = [tf.nn.rnn_cell.LSTMCell(self.output_dim, state_is_tuple=True) for _ in range(self.config.lstm_layers)]
@@ -212,6 +216,7 @@ class BIDAF():
             att_new_linear = tf.reshape(tf.matmul(att_new_concat, p2_w), [self.config.batch_size, -1]) # (batch, 791)
 
             att_new_linear = tf.nn.dropout(att_new_linear, self.keep_prob)
+            # att_new_linear = tf.nn.log_softmax(att_new_linear)
             arg_p2 = tf.argmax(tf.nn.softmax(att_new_linear), axis=1)
 
             return att_model_linear, att_new_linear, arg_p1, arg_p2
@@ -262,27 +267,27 @@ class BIDAF():
             self.ema = tf.train.ExponentialMovingAverage(self.config.decay_rate)
 
         with tf.name_scope("loss"):
-            # self.loss_p1 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf.cast(self.answer_start, 'float'), \
-            #                                                             logits=self.att_model_linear)
-            loss_p1 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf.cast(self.answer_start, 'float'), \
-                                                                        logits=self.prob1)
+            loss_p1 = tf.nn.softmax_cross_entropy_with_logits(labels=tf.cast(self.answer_start, 'float'),logits=self.prob1)
+            # loss_p1 = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.answer_start, logits=self.prob1)
             self.cross_entropy_p1 = tf.reduce_mean(loss_p1)
             tf.add_to_collection('losses', self.cross_entropy_p1)
-            loss_p2 = tf.nn.softmax_cross_entropy_with_logits_v2(labels=tf.cast(self.answer_stop, 'float'), \
-                                                                        logits=self.prob2)
+
+            loss_p2 = tf.nn.softmax_cross_entropy_with_logits(labels=tf.cast(self.answer_stop, 'float'), logits=self.prob2)
+            # loss_p2 = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.answer_stop, logits=self.prob2)
             self.cross_entropy_p2 = tf.reduce_mean(loss_p2)
             tf.add_to_collection('losses', self.cross_entropy_p2)
+
             self.loss = tf.add_n(tf.get_collection('losses'), name='loss')
             tf.summary.scalar(self.loss.name, self.loss)
 
             tf.add_to_collection('ema/scalar', self.loss)
-            # self.loss = tf.add(self.loss_p1, self.loss_p2)
             # self.cross_entropy = tf.add(self.cross_entropy_p1, self.cross_entropy_p2)
 
-            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-            with tf.control_dependencies(update_ops):
-                # self.train_opt = tf.train.AdamOptimizer(self.config.lr).minimize(self.cross_entropy, global_step=self.global_step)
-                self.train_opt = tf.train.AdadeltaOptimizer(self.config.lr).minimize(self.loss, global_step=self.global_step)
+            # update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+            # with tf.control_dependencies(update_ops):
+            # self.train_opt = tf.train.AdamOptimizer(self.config.lr).minimize(self.cross_entropy, global_step=self.global_step)
+            self.optimizer = tf.train.AdadeltaOptimizer(self.config.lr)
+            self.train_opt = self.optimizer.minimize(self.loss, global_step=self.global_step)
 
     def model_summary(self, ):
         model_vars = tf.trainable_variables()

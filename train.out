@@ -1,0 +1,2334 @@
+2019-08-15 01:11:57.661154: I tensorflow/core/platform/cpu_feature_guard.cc:141] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 FMA
+2019-08-15 01:11:57.957431: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1392] Found device 0 with properties: 
+name: TITAN Xp major: 6 minor: 1 memoryClockRate(GHz): 1.582
+pciBusID: 0000:03:00.0
+totalMemory: 11.90GiB freeMemory: 11.74GiB
+2019-08-15 01:11:57.957467: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1471] Adding visible gpu devices: 0
+2019-08-15 01:11:58.189101: I tensorflow/core/common_runtime/gpu/gpu_device.cc:952] Device interconnect StreamExecutor with strength 1 edge matrix:
+2019-08-15 01:11:58.189143: I tensorflow/core/common_runtime/gpu/gpu_device.cc:958]      0 
+2019-08-15 01:11:58.189150: I tensorflow/core/common_runtime/gpu/gpu_device.cc:971] 0:   N 
+2019-08-15 01:11:58.189414: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1084] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 11360 MB memory) -> physical GPU (device: 0, name: TITAN Xp, pci bus id: 0000:03:00.0, compute capability: 6.1)
+ # --------------- start making data --------------- # 
+
+answer mismatch number 754
+char2idx number:  1259
+ # --------------- start making data --------------- # 
+
+answer mismatch number 309
+char2idx number:  1311
+---------
+Variables: name (type shape) [size]
+---------
+word_emb/glove_table:0 (float32_ref 95205x300) [28561500, bytes: 114246000]
+char_emb/char_embed:0 (float32_ref 1311x8) [10488, bytes: 41952]
+char_emb/TDNN/filter_5/filters:0 (float32_ref 1x5x8x100) [4000, bytes: 16000]
+char_emb/TDNN/filter_5/filters_bias:0 (float32_ref 100) [100, bytes: 400]
+highway_net/transgate/highway_matrix:0 (float32_ref 400x400) [160000, bytes: 640000]
+highway_net/transgate/highway_bias:0 (float32_ref 400) [400, bytes: 1600]
+highway_net/MLP/highway_matrix:0 (float32_ref 400x400) [160000, bytes: 640000]
+highway_net/MLP/highway_bias:0 (float32_ref 400) [400, bytes: 1600]
+context_cont/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 800x1600) [1280000, bytes: 5120000]
+context_cont/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+context_cont/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 800x1600) [1280000, bytes: 5120000]
+context_cont/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+context_ques/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 800x1600) [1280000, bytes: 5120000]
+context_ques/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+context_ques/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 800x1600) [1280000, bytes: 5120000]
+context_ques/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+similarity_matrix/similarity_weight:0 (float32_ref 2400x1) [2400, bytes: 9600]
+modeling_layer_0/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 3600x1600) [5760000, bytes: 23040000]
+modeling_layer_0/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+modeling_layer_0/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 3600x1600) [5760000, bytes: 23040000]
+modeling_layer_0/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+modeling_layer_1/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 1200x1600) [1920000, bytes: 7680000]
+modeling_layer_1/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+modeling_layer_1/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 1200x1600) [1920000, bytes: 7680000]
+modeling_layer_1/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+output_layer/start_output_weight:0 (float32_ref 4000x1) [4000, bytes: 16000]
+output_layer/end_output_weight:0 (float32_ref 4000x1) [4000, bytes: 16000]
+output_layer/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 1200x1600) [1920000, bytes: 7680000]
+output_layer/bidirectional_rnn/fw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+output_layer/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/kernel:0 (float32_ref 1200x1600) [1920000, bytes: 7680000]
+output_layer/bidirectional_rnn/bw/multi_rnn_cell/cell_0/lstm_cell/bias:0 (float32_ref 1600) [1600, bytes: 6400]
+Total size of variables: 53243288
+Total bytes of variables: 212973152
+ -------------------- Epoch 0 is ongoing -------------------- 
+
+Epoch 0, train_step 99: loss : 9.3667 
+
+Epoch 0, train_step 199: loss : 8.9406 
+
+Epoch 0, train_step 299: loss : 10.5820 
+
+Epoch 0, train_step 399: loss : 9.5474 
+
+Epoch 0, train_step 499: loss : 8.7880 
+
+Epoch 0, train_step 599: loss : 8.8106 
+
+Epoch 0, train_step 699: loss : 8.5788 
+
+Epoch 0, train_step 799: loss : 8.8438 
+
+Epoch 0, train_step 899: loss : 8.8164 
+
+Epoch 0, train_step 999: loss : 9.7059 
+
+Epoch 0, train_step 1099: loss : 8.6720 
+
+Epoch 0, train_step 1199: loss : 9.1311 
+
+Epoch 0, train_step 1299: loss : 9.3325 
+
+Epoch 0, train_step 1399: loss : 10.3372 
+
+Epoch 0, train_step 1499: loss : 8.9439 
+
+Epoch 0, train_step 1599: loss : 9.2526 
+
+Epoch 0, train_step 1699: loss : 9.3014 
+
+Epoch 0, train_step 1799: loss : 9.4277 
+
+Epoch 0, train_step 1899: loss : 9.8124 
+
+Epoch 0, train_step 1999: loss : 9.5694 
+
+Epoch 0, train_step 2099: loss : 8.4685 
+
+Epoch 0, train_step 2199: loss : 9.9917 
+
+Epoch 0, train_step 2299: loss : 8.5506 
+
+Epoch 0, train_step 2399: loss : 9.8625 
+
+Epoch 0, train_step 2499: loss : 9.7341 
+
+Epoch 0, train_step 2599: loss : 9.9889 
+
+Epoch 0, train_step 2699: loss : 9.4325 
+
+Epoch 0, train_step 2799: loss : 9.2664 
+
+Epoch 0, train_step 2899: loss : 9.2799 
+
+Epoch 0, train_step 2999: loss : 8.7135 
+
+Epoch 0, train_step 3099: loss : 9.6714 
+
+Epoch 0, train_step 3199: loss : 9.3795 
+
+Epoch 0, train_step 3299: loss : 9.3620 
+
+Epoch 0, train_step 3399: loss : 9.4037 
+
+Epoch 0, train_step 3499: loss : 9.8726 
+
+Epoch 0, train_step 3599: loss : 9.0864 
+
+Epoch 0, train_step 3699: loss : 8.9808 
+
+Epoch 0, train_step 3799: loss : 8.7680 
+
+Epoch 0, train_step 3899: loss : 9.4035 
+
+Epoch 0, train_step 3999: loss : 9.5569 
+
+Epoch 0, train_step 4099: loss : 9.2218 
+
+Epoch 0, train_step 4199: loss : 9.9071 
+
+Epoch 0, train_step 4299: loss : 9.5133 
+
+Successfully saved model
+
+Epoch 0, dev_step 99 
+
+Epoch 0, dev_step 199 
+
+Epoch 0, dev_step 299 
+
+Epoch 0, dev_step 399 
+
+Epoch 0, dev_step 499 
+
+Epoch 0, dev_step 599 
+
+Epoch 0, dev_step 699 
+
+Epoch 0, dev_step 799 
+
+Epoch 0, dev_step 899 
+
+Epoch 0, dev_step 999 
+
+Epoch 0, dev_step 1099 
+
+Epoch 0, dev_step 1199 
+
+Epoch 0, dev_step 1299 
+
+Epoch 0, dev_step 1399 
+
+Epoch 0, dev_step 1499 
+
+Epoch 0, dev_step 1599 
+
+Epoch 0, dev_step 1699 
+
+exact_match
+ 0.4824976348155156
+f1 score
+ 5.165427831979965
+ -------------------- Epoch 1 is ongoing -------------------- 
+
+Epoch 1, train_step 99: loss : 8.4507 
+
+Epoch 1, train_step 199: loss : 8.3525 
+
+Epoch 1, train_step 299: loss : 9.5626 
+
+Epoch 1, train_step 399: loss : 9.1725 
+
+Epoch 1, train_step 499: loss : 8.3416 
+
+Epoch 1, train_step 599: loss : 8.7611 
+
+Epoch 1, train_step 699: loss : 7.6492 
+
+Epoch 1, train_step 799: loss : 8.3373 
+
+Epoch 1, train_step 899: loss : 8.3364 
+
+Epoch 1, train_step 999: loss : 9.4457 
+
+Epoch 1, train_step 1099: loss : 8.1755 
+
+Epoch 1, train_step 1199: loss : 8.7220 
+
+Epoch 1, train_step 1299: loss : 8.1256 
+
+Epoch 1, train_step 1399: loss : 9.4164 
+
+Epoch 1, train_step 1499: loss : 8.9319 
+
+Epoch 1, train_step 1599: loss : 9.2808 
+
+Epoch 1, train_step 1699: loss : 8.7814 
+
+Epoch 1, train_step 1799: loss : 9.2913 
+
+Epoch 1, train_step 1899: loss : 9.8081 
+
+Epoch 1, train_step 1999: loss : 8.4074 
+
+Epoch 1, train_step 2099: loss : 7.6830 
+
+Epoch 1, train_step 2199: loss : 9.1310 
+
+Epoch 1, train_step 2299: loss : 8.7073 
+
+Epoch 1, train_step 2399: loss : 9.3901 
+
+Epoch 1, train_step 2499: loss : 9.3614 
+
+Epoch 1, train_step 2599: loss : 9.8400 
+
+Epoch 1, train_step 2699: loss : 9.4544 
+
+Epoch 1, train_step 2799: loss : 9.3218 
+
+Epoch 1, train_step 2899: loss : 9.1751 
+
+Epoch 1, train_step 2999: loss : 8.7333 
+
+Epoch 1, train_step 3099: loss : 9.5557 
+
+Epoch 1, train_step 3199: loss : 9.5697 
+
+Epoch 1, train_step 3299: loss : 8.8671 
+
+Epoch 1, train_step 3399: loss : 8.8276 
+
+Epoch 1, train_step 3499: loss : 10.0914 
+
+Epoch 1, train_step 3599: loss : 9.0769 
+
+Epoch 1, train_step 3699: loss : 9.1669 
+
+Epoch 1, train_step 3799: loss : 8.8043 
+
+Epoch 1, train_step 3899: loss : 9.5824 
+
+Epoch 1, train_step 3999: loss : 9.1617 
+
+Epoch 1, train_step 4099: loss : 8.7793 
+
+Epoch 1, train_step 4199: loss : 9.7479 
+
+Epoch 1, train_step 4299: loss : 9.2555 
+
+Successfully saved model
+
+Epoch 1, dev_step 99 
+
+Epoch 1, dev_step 199 
+
+Epoch 1, dev_step 299 
+
+Epoch 1, dev_step 399 
+
+Epoch 1, dev_step 499 
+
+Epoch 1, dev_step 599 
+
+Epoch 1, dev_step 699 
+
+Epoch 1, dev_step 799 
+
+Epoch 1, dev_step 899 
+
+Epoch 1, dev_step 999 
+
+Epoch 1, dev_step 1099 
+
+Epoch 1, dev_step 1199 
+
+Epoch 1, dev_step 1299 
+
+Epoch 1, dev_step 1399 
+
+Epoch 1, dev_step 1499 
+
+Epoch 1, dev_step 1599 
+/home/minbyul/anaconda3/envs/re_env/lib/python3.6/site-packages/tensorflow/python/framework/dtypes.py:523: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint8 = np.dtype([("qint8", np.int8, 1)])
+/home/minbyul/anaconda3/envs/re_env/lib/python3.6/site-packages/tensorflow/python/framework/dtypes.py:524: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint8 = np.dtype([("quint8", np.uint8, 1)])
+/home/minbyul/anaconda3/envs/re_env/lib/python3.6/site-packages/tensorflow/python/framework/dtypes.py:525: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint16 = np.dtype([("qint16", np.int16, 1)])
+/home/minbyul/anaconda3/envs/re_env/lib/python3.6/site-packages/tensorflow/python/framework/dtypes.py:526: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_quint16 = np.dtype([("quint16", np.uint16, 1)])
+/home/minbyul/anaconda3/envs/re_env/lib/python3.6/site-packages/tensorflow/python/framework/dtypes.py:527: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  _np_qint32 = np.dtype([("qint32", np.int32, 1)])
+/home/minbyul/anaconda3/envs/re_env/lib/python3.6/site-packages/tensorflow/python/framework/dtypes.py:532: FutureWarning: Passing (type, 1) or '1type' as a synonym of type is deprecated; in a future version of numpy, it will be understood as (type, (1,)) / '(1,)type'.
+  np_resource = np.dtype([("resource", np.ubyte, 1)])
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Epoch 1, dev_step 1699 
+
+exact_match
+ 0.6527909176915799
+f1 score
+ 5.499596954931828
+ -------------------- Epoch 2 is ongoing -------------------- 
+
+Epoch 2, train_step 99: loss : 8.7059 
+
+Epoch 2, train_step 199: loss : 8.4105 
+
+Epoch 2, train_step 299: loss : 9.9306 
+
+Epoch 2, train_step 399: loss : 8.8816 
+
+Epoch 2, train_step 499: loss : 8.1977 
+
+Epoch 2, train_step 599: loss : 7.7744 
+
+Epoch 2, train_step 699: loss : 8.1223 
+
+Epoch 2, train_step 799: loss : 7.7577 
+
+Epoch 2, train_step 899: loss : 8.4382 
+
+Epoch 2, train_step 999: loss : 10.0887 
+
+Epoch 2, train_step 1099: loss : 8.4526 
+
+Epoch 2, train_step 1199: loss : 9.0323 
+
+Epoch 2, train_step 1299: loss : 8.1537 
+
+Epoch 2, train_step 1399: loss : 9.2853 
+
+Epoch 2, train_step 1499: loss : 9.0330 
+
+Epoch 2, train_step 1599: loss : 9.1107 
+
+Epoch 2, train_step 1699: loss : 8.7744 
+
+Epoch 2, train_step 1799: loss : 9.0855 
+
+Epoch 2, train_step 1899: loss : 9.4632 
+
+Epoch 2, train_step 1999: loss : 8.6066 
+
+Epoch 2, train_step 2099: loss : 7.9641 
+
+Epoch 2, train_step 2199: loss : 8.7538 
+
+Epoch 2, train_step 2299: loss : 8.5454 
+
+Epoch 2, train_step 2399: loss : 9.3807 
+
+Epoch 2, train_step 2499: loss : 9.2497 
+
+Epoch 2, train_step 2599: loss : 10.2608 
+
+Epoch 2, train_step 2699: loss : 9.6505 
+
+Epoch 2, train_step 2799: loss : 9.2954 
+
+Epoch 2, train_step 2899: loss : 8.6534 
+
+Epoch 2, train_step 2999: loss : 8.2745 
+
+Epoch 2, train_step 3099: loss : 9.7048 
+
+Epoch 2, train_step 3199: loss : 8.9962 
+
+Epoch 2, train_step 3299: loss : 8.9817 
+
+Epoch 2, train_step 3399: loss : 8.8753 
+
+Epoch 2, train_step 3499: loss : 9.8590 
+
+Epoch 2, train_step 3599: loss : 9.0675 
+
+Epoch 2, train_step 3699: loss : 9.1319 
+
+Epoch 2, train_step 3799: loss : 8.7876 
+
+Epoch 2, train_step 3899: loss : 9.3642 
+
+Epoch 2, train_step 3999: loss : 9.3495 
+
+Epoch 2, train_step 4099: loss : 8.4553 
+
+Epoch 2, train_step 4199: loss : 10.3462 
+
+Epoch 2, train_step 4299: loss : 9.3365 
+
+Successfully saved model
+
+Epoch 2, dev_step 99 
+
+Epoch 2, dev_step 199 
+
+Epoch 2, dev_step 299 
+
+Epoch 2, dev_step 399 
+
+Epoch 2, dev_step 499 
+
+Epoch 2, dev_step 599 
+
+Epoch 2, dev_step 699 
+
+Epoch 2, dev_step 799 
+
+Epoch 2, dev_step 899 
+
+Epoch 2, dev_step 999 
+
+Epoch 2, dev_step 1099 
+
+Epoch 2, dev_step 1199 
+
+Epoch 2, dev_step 1299 
+
+Epoch 2, dev_step 1399 
+
+Epoch 2, dev_step 1499 
+
+Epoch 2, dev_step 1599 
+
+Epoch 2, dev_step 1699 
+
+exact_match
+ 0.6717123935666982
+f1 score
+ 5.781498654775652
+ -------------------- Epoch 3 is ongoing -------------------- 
+
+Epoch 3, train_step 99: loss : 8.3667 
+
+Epoch 3, train_step 199: loss : 8.1225 
+
+Epoch 3, train_step 299: loss : 9.8917 
+
+Epoch 3, train_step 399: loss : 8.6744 
+
+Epoch 3, train_step 499: loss : 7.4891 
+
+Epoch 3, train_step 599: loss : 7.7412 
+
+Epoch 3, train_step 699: loss : 7.2495 
+
+Epoch 3, train_step 799: loss : 7.6681 
+
+Epoch 3, train_step 899: loss : 8.3270 
+
+Epoch 3, train_step 999: loss : 9.8978 
+
+Epoch 3, train_step 1099: loss : 8.5658 
+
+Epoch 3, train_step 1199: loss : 8.5385 
+
+Epoch 3, train_step 1299: loss : 8.0493 
+
+Epoch 3, train_step 1399: loss : 8.3840 
+
+Epoch 3, train_step 1499: loss : 9.1341 
+
+Epoch 3, train_step 1599: loss : 9.0886 
+
+Epoch 3, train_step 1699: loss : 8.2670 
+
+Epoch 3, train_step 1799: loss : 8.5396 
+
+Epoch 3, train_step 1899: loss : 9.1983 
+
+Epoch 3, train_step 1999: loss : 8.1674 
+
+Epoch 3, train_step 2099: loss : 7.4263 
+
+Epoch 3, train_step 2199: loss : 8.2953 
+
+Epoch 3, train_step 2299: loss : 7.5807 
+
+Epoch 3, train_step 2399: loss : 9.2021 
+
+Epoch 3, train_step 2499: loss : 9.4969 
+
+Epoch 3, train_step 2599: loss : 9.5261 
+
+Epoch 3, train_step 2699: loss : 9.1125 
+
+Epoch 3, train_step 2799: loss : 8.8251 
+
+Epoch 3, train_step 2899: loss : 8.7452 
+
+Epoch 3, train_step 2999: loss : 7.5698 
+
+Epoch 3, train_step 3099: loss : 9.4644 
+
+Epoch 3, train_step 3199: loss : 9.0390 
+
+Epoch 3, train_step 3299: loss : 8.3843 
+
+Epoch 3, train_step 3399: loss : 8.3265 
+
+Epoch 3, train_step 3499: loss : 9.7625 
+
+Epoch 3, train_step 3599: loss : 8.3701 
+
+Epoch 3, train_step 3699: loss : 9.1320 
+
+Epoch 3, train_step 3799: loss : 8.5138 
+
+Epoch 3, train_step 3899: loss : 8.6524 
+
+Epoch 3, train_step 3999: loss : 9.3195 
+
+Epoch 3, train_step 4099: loss : 8.7275 
+
+Epoch 3, train_step 4199: loss : 9.8199 
+
+Epoch 3, train_step 4299: loss : 8.8400 
+
+Successfully saved model
+
+Epoch 3, dev_step 99 
+
+Epoch 3, dev_step 199 
+
+Epoch 3, dev_step 299 
+
+Epoch 3, dev_step 399 
+
+Epoch 3, dev_step 499 
+
+Epoch 3, dev_step 599 
+
+Epoch 3, dev_step 699 
+
+Epoch 3, dev_step 799 
+
+Epoch 3, dev_step 899 
+
+Epoch 3, dev_step 999 
+
+Epoch 3, dev_step 1099 
+
+Epoch 3, dev_step 1199 
+
+Epoch 3, dev_step 1299 
+
+Epoch 3, dev_step 1399 
+
+Epoch 3, dev_step 1499 
+
+Epoch 3, dev_step 1599 
+
+Epoch 3, dev_step 1699 
+
+exact_match
+ 1.390728476821192
+f1 score
+ 7.039338612040506
+ -------------------- Epoch 4 is ongoing -------------------- 
+
+Epoch 4, train_step 99: loss : 8.3878 
+
+Epoch 4, train_step 199: loss : 7.9856 
+
+Epoch 4, train_step 299: loss : 9.9021 
+
+Epoch 4, train_step 399: loss : 8.2444 
+
+Epoch 4, train_step 499: loss : 7.7362 
+
+Epoch 4, train_step 599: loss : 7.5569 
+
+Epoch 4, train_step 699: loss : 7.5450 
+
+Epoch 4, train_step 799: loss : 7.3450 
+
+Epoch 4, train_step 899: loss : 8.2079 
+
+Epoch 4, train_step 999: loss : 9.7011 
+
+Epoch 4, train_step 1099: loss : 7.3276 
+
+Epoch 4, train_step 1199: loss : 8.0726 
+
+Epoch 4, train_step 1299: loss : 8.4462 
+
+Epoch 4, train_step 1399: loss : 8.3119 
+
+Epoch 4, train_step 1499: loss : 8.6387 
+
+Epoch 4, train_step 1599: loss : 8.9880 
+
+Epoch 4, train_step 1699: loss : 8.5957 
+
+Epoch 4, train_step 1799: loss : 8.5092 
+
+Epoch 4, train_step 1899: loss : 9.3919 
+
+Epoch 4, train_step 1999: loss : 8.0932 
+
+Epoch 4, train_step 2099: loss : 7.2629 
+
+Epoch 4, train_step 2199: loss : 8.6560 
+
+Epoch 4, train_step 2299: loss : 8.0384 
+
+Epoch 4, train_step 2399: loss : 9.1642 
+
+Epoch 4, train_step 2499: loss : 9.3657 
+
+Epoch 4, train_step 2599: loss : 9.5813 
+
+Epoch 4, train_step 2699: loss : 8.9009 
+
+Epoch 4, train_step 2799: loss : 8.3828 
+
+Epoch 4, train_step 2899: loss : 8.5083 
+
+Epoch 4, train_step 2999: loss : 8.7914 
+
+Epoch 4, train_step 3099: loss : 9.3395 
+
+Epoch 4, train_step 3199: loss : 9.3672 
+
+Epoch 4, train_step 3299: loss : 8.4946 
+
+Epoch 4, train_step 3399: loss : 7.8342 
+
+Epoch 4, train_step 3499: loss : 9.7166 
+
+Epoch 4, train_step 3599: loss : 8.6207 
+
+Epoch 4, train_step 3699: loss : 8.7548 
+
+Epoch 4, train_step 3799: loss : 8.2380 
+
+Epoch 4, train_step 3899: loss : 8.8694 
+
+Epoch 4, train_step 3999: loss : 8.4813 
+
+Epoch 4, train_step 4099: loss : 9.2479 
+
+Epoch 4, train_step 4199: loss : 9.7217 
+
+Epoch 4, train_step 4299: loss : 9.2689 
+
+Successfully saved model
+
+Epoch 4, dev_step 99 
+
+Epoch 4, dev_step 199 
+
+Epoch 4, dev_step 299 
+
+Epoch 4, dev_step 399 
+
+Epoch 4, dev_step 499 
+
+Epoch 4, dev_step 599 
+
+Epoch 4, dev_step 699 
+
+Epoch 4, dev_step 799 
+
+Epoch 4, dev_step 899 
+
+Epoch 4, dev_step 999 
+
+Epoch 4, dev_step 1099 
+
+Epoch 4, dev_step 1199 
+
+Epoch 4, dev_step 1299 
+
+Epoch 4, dev_step 1399 
+
+Epoch 4, dev_step 1499 
+
+Epoch 4, dev_step 1599 
+
+Epoch 4, dev_step 1699 
+
+exact_match
+ 1.4474929044465468
+f1 score
+ 7.288634348332177
+ -------------------- Epoch 5 is ongoing -------------------- 
+
+Epoch 5, train_step 99: loss : 8.1367 
+
+Epoch 5, train_step 199: loss : 7.7150 
+
+Epoch 5, train_step 299: loss : 9.4728 
+
+Epoch 5, train_step 399: loss : 7.9397 
+
+Epoch 5, train_step 499: loss : 7.9583 
+
+Epoch 5, train_step 599: loss : 6.6027 
+
+Epoch 5, train_step 699: loss : 7.5990 
+
+Epoch 5, train_step 799: loss : 7.1500 
+
+Epoch 5, train_step 899: loss : 7.5400 
+
+Epoch 5, train_step 999: loss : 9.7213 
+
+Epoch 5, train_step 1099: loss : 7.7455 
+
+Epoch 5, train_step 1199: loss : 7.8379 
+
+Epoch 5, train_step 1299: loss : 7.1090 
+
+Epoch 5, train_step 1399: loss : 8.5112 
+
+Epoch 5, train_step 1499: loss : 8.7798 
+
+Epoch 5, train_step 1599: loss : 8.6509 
+
+Epoch 5, train_step 1699: loss : 7.7914 
+
+Epoch 5, train_step 1799: loss : 7.8385 
+
+Epoch 5, train_step 1899: loss : 9.0045 
+
+Epoch 5, train_step 1999: loss : 7.3826 
+
+Epoch 5, train_step 2099: loss : 7.9768 
+
+Epoch 5, train_step 2199: loss : 8.0147 
+
+Epoch 5, train_step 2299: loss : 8.0889 
+
+Epoch 5, train_step 2399: loss : 9.0786 
+
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Epoch 5, train_step 2499: loss : 8.1777 
+
+Epoch 5, train_step 2599: loss : 9.2365 
+
+Epoch 5, train_step 2699: loss : 8.9854 
+
+Epoch 5, train_step 2799: loss : 8.0391 
+
+Epoch 5, train_step 2899: loss : 8.7910 
+
+Epoch 5, train_step 2999: loss : 7.8452 
+
+Epoch 5, train_step 3099: loss : 9.1014 
+
+Epoch 5, train_step 3199: loss : 9.4629 
+
+Epoch 5, train_step 3299: loss : 8.5165 
+
+Epoch 5, train_step 3399: loss : 8.2229 
+
+Epoch 5, train_step 3499: loss : 9.0822 
+
+Epoch 5, train_step 3599: loss : 8.3104 
+
+Epoch 5, train_step 3699: loss : 9.2146 
+
+Epoch 5, train_step 3799: loss : 8.0362 
+
+Epoch 5, train_step 3899: loss : 8.4787 
+
+Epoch 5, train_step 3999: loss : 8.4942 
+
+Epoch 5, train_step 4099: loss : 7.9910 
+
+Epoch 5, train_step 4199: loss : 9.7777 
+
+Epoch 5, train_step 4299: loss : 8.7607 
+
+Successfully saved model
+
+Epoch 5, dev_step 99 
+
+Epoch 5, dev_step 199 
+
+Epoch 5, dev_step 299 
+
+Epoch 5, dev_step 399 
+
+Epoch 5, dev_step 499 
+
+Epoch 5, dev_step 599 
+
+Epoch 5, dev_step 699 
+
+Epoch 5, dev_step 799 
+
+Epoch 5, dev_step 899 
+
+Epoch 5, dev_step 999 
+
+Epoch 5, dev_step 1099 
+
+Epoch 5, dev_step 1199 
+
+Epoch 5, dev_step 1299 
+
+Epoch 5, dev_step 1399 
+
+Epoch 5, dev_step 1499 
+
+Epoch 5, dev_step 1599 
+
+Epoch 5, dev_step 1699 
+
+exact_match
+ 2.024597918637654
+f1 score
+ 8.080406862927443
+ -------------------- Epoch 6 is ongoing -------------------- 
+
+Epoch 6, train_step 99: loss : 8.0777 
+
+Epoch 6, train_step 199: loss : 7.5997 
+
+Epoch 6, train_step 299: loss : 8.8338 
+
+Epoch 6, train_step 399: loss : 7.7845 
+
+Epoch 6, train_step 499: loss : 7.5333 
+
+Epoch 6, train_step 599: loss : 7.1042 
+
+Epoch 6, train_step 699: loss : 7.6036 
+
+Epoch 6, train_step 799: loss : 7.4759 
+
+Epoch 6, train_step 899: loss : 7.5832 
+
+Epoch 6, train_step 999: loss : 9.3870 
+
+Epoch 6, train_step 1099: loss : 8.0075 
+
+Epoch 6, train_step 1199: loss : 8.1062 
+
+Epoch 6, train_step 1299: loss : 6.6700 
+
+Epoch 6, train_step 1399: loss : 8.6068 
+
+Epoch 6, train_step 1499: loss : 8.4665 
+
+Epoch 6, train_step 1599: loss : 8.6253 
+
+Epoch 6, train_step 1699: loss : 8.1290 
+
+Epoch 6, train_step 1799: loss : 7.9758 
+
+Epoch 6, train_step 1899: loss : 9.5668 
+
+Epoch 6, train_step 1999: loss : 7.3792 
+
+Epoch 6, train_step 2099: loss : 7.5191 
+
+Epoch 6, train_step 2199: loss : 8.4450 
+
+Epoch 6, train_step 2299: loss : 7.8237 
+
+Epoch 6, train_step 2399: loss : 8.5004 
+
+Epoch 6, train_step 2499: loss : 9.0511 
+
+Epoch 6, train_step 2599: loss : 9.2368 
+
+Epoch 6, train_step 2699: loss : 8.7985 
+
+Epoch 6, train_step 2799: loss : 8.4102 
+
+Epoch 6, train_step 2899: loss : 8.4710 
+
+Epoch 6, train_step 2999: loss : 8.0439 
+
+Epoch 6, train_step 3099: loss : 8.9667 
+
+Epoch 6, train_step 3199: loss : 8.2606 
+
+Epoch 6, train_step 3299: loss : 8.2141 
+
+Epoch 6, train_step 3399: loss : 7.6424 
+
+Epoch 6, train_step 3499: loss : 9.1672 
+
+Epoch 6, train_step 3599: loss : 8.2296 
+
+Epoch 6, train_step 3699: loss : 8.8011 
+
+Epoch 6, train_step 3799: loss : 8.1885 
+
+Epoch 6, train_step 3899: loss : 8.4358 
+
+Epoch 6, train_step 3999: loss : 8.4236 
+
+Epoch 6, train_step 4099: loss : 8.7203 
+
+Epoch 6, train_step 4199: loss : 9.8011 
+
+Epoch 6, train_step 4299: loss : 8.5133 
+
+Successfully saved model
+
+Epoch 6, dev_step 99 
+
+Epoch 6, dev_step 199 
+
+Epoch 6, dev_step 299 
+
+Epoch 6, dev_step 399 
+
+Epoch 6, dev_step 499 
+
+Epoch 6, dev_step 599 
+
+Epoch 6, dev_step 699 
+
+Epoch 6, dev_step 799 
+
+Epoch 6, dev_step 899 
+
+Epoch 6, dev_step 999 
+
+Epoch 6, dev_step 1099 
+
+Epoch 6, dev_step 1199 
+
+Epoch 6, dev_step 1299 
+
+Epoch 6, dev_step 1399 
+
+Epoch 6, dev_step 1499 
+
+Epoch 6, dev_step 1599 
+
+Epoch 6, dev_step 1699 
+
+exact_match
+ 2.2989593188268684
+f1 score
+ 8.426787048782387
+ -------------------- Epoch 7 is ongoing -------------------- 
+
+Epoch 7, train_step 99: loss : 8.1546 
+
+Epoch 7, train_step 199: loss : 6.7029 
+
+Epoch 7, train_step 299: loss : 8.6124 
+
+Epoch 7, train_step 399: loss : 8.3317 
+
+Epoch 7, train_step 499: loss : 7.3832 
+
+Epoch 7, train_step 599: loss : 6.1926 
+
+Epoch 7, train_step 699: loss : 7.1381 
+
+Epoch 7, train_step 799: loss : 6.3839 
+
+Epoch 7, train_step 899: loss : 7.0850 
+
+Epoch 7, train_step 999: loss : 9.8498 
+
+Epoch 7, train_step 1099: loss : 7.0454 
+
+Epoch 7, train_step 1199: loss : 7.5102 
+
+Epoch 7, train_step 1299: loss : 7.2485 
+
+Epoch 7, train_step 1399: loss : 8.6577 
+
+Epoch 7, train_step 1499: loss : 9.2403 
+
+Epoch 7, train_step 1599: loss : 8.0342 
+
+Epoch 7, train_step 1699: loss : 8.6076 
+
+Epoch 7, train_step 1799: loss : 8.6145 
+
+Epoch 7, train_step 1899: loss : 8.8818 
+
+Epoch 7, train_step 1999: loss : 7.6653 
+
+Epoch 7, train_step 2099: loss : 7.0741 
+
+Epoch 7, train_step 2199: loss : 8.4008 
+
+Epoch 7, train_step 2299: loss : 8.8048 
+
+Epoch 7, train_step 2399: loss : 8.6848 
+
+Epoch 7, train_step 2499: loss : 8.2139 
+
+Epoch 7, train_step 2599: loss : 9.8374 
+
+Epoch 7, train_step 2699: loss : 8.7214 
+
+Epoch 7, train_step 2799: loss : 8.8852 
+
+Epoch 7, train_step 2899: loss : 8.2452 
+
+Epoch 7, train_step 2999: loss : 7.8244 
+
+Epoch 7, train_step 3099: loss : 9.3206 
+
+Epoch 7, train_step 3199: loss : 8.9337 
+
+Epoch 7, train_step 3299: loss : 7.7431 
+
+Epoch 7, train_step 3399: loss : 7.6107 
+
+Epoch 7, train_step 3499: loss : 9.0717 
+
+Epoch 7, train_step 3599: loss : 8.7410 
+
+Epoch 7, train_step 3699: loss : 8.5876 
+
+Epoch 7, train_step 3799: loss : 8.0303 
+
+Epoch 7, train_step 3899: loss : 8.8342 
+
+Epoch 7, train_step 3999: loss : 9.3132 
+
+Epoch 7, train_step 4099: loss : 8.2497 
+
+Epoch 7, train_step 4199: loss : 9.8768 
+
+Epoch 7, train_step 4299: loss : 8.3337 
+
+Successfully saved model
+
+Epoch 7, dev_step 99 
+
+Epoch 7, dev_step 199 
+
+Epoch 7, dev_step 299 
+
+Epoch 7, dev_step 399 
+
+Epoch 7, dev_step 499 
+
+Epoch 7, dev_step 599 
+
+Epoch 7, dev_step 699 
+
+Epoch 7, dev_step 799 
+
+Epoch 7, dev_step 899 
+
+Epoch 7, dev_step 999 
+
+Epoch 7, dev_step 1099 
+
+Epoch 7, dev_step 1199 
+
+Epoch 7, dev_step 1299 
+
+Epoch 7, dev_step 1399 
+
+Epoch 7, dev_step 1499 
+
+Epoch 7, dev_step 1599 
+
+Epoch 7, dev_step 1699 
+
+exact_match
+ 2.6584673604541154
+f1 score
+ 8.896233595701922
+ -------------------- Epoch 8 is ongoing -------------------- 
+
+Epoch 8, train_step 99: loss : 8.1643 
+
+Epoch 8, train_step 199: loss : 7.7422 
+
+Epoch 8, train_step 299: loss : 9.2465 
+
+Epoch 8, train_step 399: loss : 8.0593 
+
+Epoch 8, train_step 499: loss : 7.0031 
+
+Epoch 8, train_step 599: loss : 6.5813 
+
+Epoch 8, train_step 699: loss : 6.7440 
+
+Epoch 8, train_step 799: loss : 7.1679 
+
+Epoch 8, train_step 899: loss : 7.6872 
+
+Epoch 8, train_step 999: loss : 9.1907 
+
+Epoch 8, train_step 1099: loss : 7.6843 
+
+Epoch 8, train_step 1199: loss : 7.6546 
+
+Epoch 8, train_step 1299: loss : 6.9607 
+
+Epoch 8, train_step 1399: loss : 7.9332 
+
+Epoch 8, train_step 1499: loss : 8.8321 
+
+Epoch 8, train_step 1599: loss : 8.6028 
+
+Epoch 8, train_step 1699: loss : 7.9734 
+
+Epoch 8, train_step 1799: loss : 8.2135 
+
+Epoch 8, train_step 1899: loss : 8.5344 
+
+Epoch 8, train_step 1999: loss : 7.0096 
+
+Epoch 8, train_step 2099: loss : 7.0536 
+
+Epoch 8, train_step 2199: loss : 8.3099 
+
+Epoch 8, train_step 2299: loss : 8.1264 
+
+Epoch 8, train_step 2399: loss : 8.3544 
+
+Epoch 8, train_step 2499: loss : 8.4023 
+
+Epoch 8, train_step 2599: loss : 9.1681 
+
+Epoch 8, train_step 2699: loss : 8.5890 
+
+Epoch 8, train_step 2799: loss : 8.1792 
+
+Epoch 8, train_step 2899: loss : 8.4355 
+
+Epoch 8, train_step 2999: loss : 7.7541 
+
+Epoch 8, train_step 3099: loss : 8.8448 
+
+Epoch 8, train_step 3199: loss : 9.2595 
+
+Epoch 8, train_step 3299: loss : 7.9229 
+
+Epoch 8, train_step 3399: loss : 8.0762 
+
+Epoch 8, train_step 3499: loss : 9.2661 
+
+Epoch 8, train_step 3599: loss : 8.3107 
+
+Epoch 8, train_step 3699: loss : 8.7755 
+
+Epoch 8, train_step 3799: loss : 8.1954 
+
+Epoch 8, train_step 3899: loss : 8.0950 
+
+Epoch 8, train_step 3999: loss : 9.2184 
+
+Epoch 8, train_step 4099: loss : 8.5376 
+
+Epoch 8, train_step 4199: loss : 9.2177 
+
+Epoch 8, train_step 4299: loss : 8.6614 
+
+Successfully saved model
+
+Epoch 8, dev_step 99 
+
+Epoch 8, dev_step 199 
+
+Epoch 8, dev_step 299 
+
+Epoch 8, dev_step 399 
+
+Epoch 8, dev_step 499 
+
+Epoch 8, dev_step 599 
+
+Epoch 8, dev_step 699 
+
+Epoch 8, dev_step 799 
+
+Epoch 8, dev_step 899 
+
+Epoch 8, dev_step 999 
+
+Epoch 8, dev_step 1099 
+
+Epoch 8, dev_step 1199 
+
+Epoch 8, dev_step 1299 
+
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+Unanswered question 56beb4e43aeaaa14008c9269 will receive score 0.
+Unanswered question 56d99b7bdc89441400fdb5cc will receive score 0.
+Unanswered question 56de1563cffd8e1900b4b5c4 will receive score 0.
+Unanswered question 56dfa1d34a1a83140091ebd4 will receive score 0.
+Unanswered question 56e10043e3433e1400422a88 will receive score 0.
+Unanswered question 56e10ddce3433e1400422b49 will receive score 0.
+Unanswered question 56e77a8700c9c71400d7718e will receive score 0.
+Unanswered question 56f8b2499b226e1400dd0e3c will receive score 0.
+Unanswered question 57097c8fed30961900e841f4 will receive score 0.
+Unanswered question 571090abb654c5140001f998 will receive score 0.
+Unanswered question 571090abb654c5140001f999 will receive score 0.
+Unanswered question 571a4b0f10f8ca1400304fd8 will receive score 0.
+Unanswered question 5725ca4389a1e219009abeb7 will receive score 0.
+Unanswered question 57265e455951b619008f70bd will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e519 will receive score 0.
+Unanswered question 57269e3bf1498d1400e8e51a will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ea will receive score 0.
+Unanswered question 5726b929f1498d1400e8e8ec will receive score 0.
+Unanswered question 5726bc1add62a815002e8ea9 will receive score 0.
+Unanswered question 5726bc1add62a815002e8eaa will receive score 0.
+Unanswered question 5726c002708984140094d077 will receive score 0.
+Unanswered question 5726c3da708984140094d0db will receive score 0.
+Unanswered question 5726c5a9f1498d1400e8eac8 will receive score 0.
+Unanswered question 5726415bec44d21400f3dcd1 will receive score 0.
+Unanswered question 5725f2c838643c19005acef1 will receive score 0.
+Unanswered question 57263b1638643c19005ad335 will receive score 0.
+Unanswered question 572683e6f1498d1400e8e24f will receive score 0.
+Unanswered question 57269c06708984140094cba4 will receive score 0.
+Unanswered question 57269c06708984140094cba5 will receive score 0.
+Unanswered question 5726afeb708984140094cddb will receive score 0.
+Unanswered question 5726a8d4dd62a815002e8c38 will receive score 0.
+Unanswered question 5726a9ed5951b619008f796b will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee08 will receive score 0.
+Unanswered question 5726ddf6f1498d1400e8ee07 will receive score 0.
+Unanswered question 5728dafe3acd2414000e0060 will receive score 0.
+Unanswered question 572822233acd2414000df555 will receive score 0.
+Unanswered question 5728e3c33acd2414000e0131 will receive score 0.
+Unanswered question 572754dd708984140094dc3e will receive score 0.
+Unanswered question 5729d36b1d0469140077960b will receive score 0.
+Unanswered question 5727f8342ca10214002d9a7f will receive score 0.
+Unanswered question 57285841ff5b5019007da19c will receive score 0.
+Unanswered question 57286c8cff5b5019007da219 will receive score 0.
+Unanswered question 57286c8cff5b5019007da21a will receive score 0.
+Unanswered question 5728804b4b864d1900164a46 will receive score 0.
+Unanswered question 5728804b4b864d1900164a47 will receive score 0.
+Unanswered question 572881704b864d1900164a54 will receive score 0.
+Unanswered question 57295a116aef051400154d47 will receive score 0.
+Unanswered question 572961f61d0469140077935b will receive score 0.
+Unanswered question 5729645b3f37b31900478323 will receive score 0.
+Unanswered question 572968cf1d046914007793ce will receive score 0.
+Unanswered question 57297427af94a219006aa456 will receive score 0.
+Unanswered question 57297bc9af94a219006aa4c8 will receive score 0.
+Unanswered question 572fe288a23a5019007fcad9 will receive score 0.
+Unanswered question 573088da069b53140083216d will receive score 0.
+Unanswered question 57309564069b5314008321a5 will receive score 0.
+Unanswered question 57309564069b5314008321a6 will receive score 0.
+Unanswered question 5730ac782461fd1900a9cf74 will receive score 0.
+Unanswered question 5730d6fcb7151e1900c01565 will receive score 0.
+Unanswered question 5737aafd1c456719005744fd will receive score 0.
+Unanswered question 5737aafd1c456719005744fe will receive score 0.
+Unanswered question 5737aafd1c456719005744ff will receive score 0.
+
+Epoch 8, dev_step 1399 
+
+Epoch 8, dev_step 1499 
+
+Epoch 8, dev_step 1599 
+
+Epoch 8, dev_step 1699 
+
+exact_match
+ 2.8855250709555347
+f1 score
+ 9.229010916221903
+ -------------------- Epoch 9 is ongoing -------------------- 
+
+Epoch 9, train_step 99: loss : 7.7978 
+
+Epoch 9, train_step 199: loss : 7.9268 
+
+Epoch 9, train_step 299: loss : 8.6497 
+
+Epoch 9, train_step 399: loss : 7.2841 
+
+Epoch 9, train_step 499: loss : 7.0941 
+
+Epoch 9, train_step 599: loss : 6.5028 
+
+Epoch 9, train_step 699: loss : 6.2404 
+
+Epoch 9, train_step 799: loss : 6.3506 
+
+Epoch 9, train_step 899: loss : 7.8129 
+
+Epoch 9, train_step 999: loss : 8.5744 
+
+Epoch 9, train_step 1099: loss : 7.6447 
+
+Epoch 9, train_step 1199: loss : 7.3663 
+
+Epoch 9, train_step 1299: loss : 6.5933 
+
+Epoch 9, train_step 1399: loss : 8.4820 
+
+Epoch 9, train_step 1499: loss : 7.8981 
+
+Epoch 9, train_step 1599: loss : 8.3243 
+
+Epoch 9, train_step 1699: loss : 7.9350 
+
+Epoch 9, train_step 1799: loss : 7.6556 
+
+Epoch 9, train_step 1899: loss : 8.6545 
+
+Epoch 9, train_step 1999: loss : 7.8374 
+
+Epoch 9, train_step 2099: loss : 6.8734 
+
+Epoch 9, train_step 2199: loss : 8.2204 
+
+Epoch 9, train_step 2299: loss : 7.5121 
+
+Epoch 9, train_step 2399: loss : 8.3905 
+
+Epoch 9, train_step 2499: loss : 9.2091 
+
+Epoch 9, train_step 2599: loss : 9.3690 
+
+Epoch 9, train_step 2699: loss : 9.1024 
+
+Epoch 9, train_step 2799: loss : 8.6702 
+
+Epoch 9, train_step 2899: loss : 7.8193 
+
+Epoch 9, train_step 2999: loss : 7.6928 
+
+Epoch 9, train_step 3099: loss : 9.4999 
+
+Epoch 9, train_step 3199: loss : 8.8084 
+
+Epoch 9, train_step 3299: loss : 8.3215 
+
+Epoch 9, train_step 3399: loss : 7.8801 
+
+Epoch 9, train_step 3499: loss : 8.9359 
+
+Epoch 9, train_step 3599: loss : 7.7525 
+
+Epoch 9, train_step 3699: loss : 8.7271 
+
+Epoch 9, train_step 3799: loss : 8.5390 
+
+Epoch 9, train_step 3899: loss : 8.0788 
+
+Epoch 9, train_step 3999: loss : 9.1695 
+
+Epoch 9, train_step 4099: loss : 8.8666 
+
+Epoch 9, train_step 4199: loss : 9.0851 
+
+Epoch 9, train_step 4299: loss : 8.6499 
+
+Successfully saved model
+
+Epoch 9, dev_step 99 
+
+Epoch 9, dev_step 199 
+
+Epoch 9, dev_step 299 
+
+Epoch 9, dev_step 399 
+
+Epoch 9, dev_step 499 
+
+Epoch 9, dev_step 599 
+
+Epoch 9, dev_step 699 
+
+Epoch 9, dev_step 799 
+
+Epoch 9, dev_step 899 
+
+Epoch 9, dev_step 999 
+
+Epoch 9, dev_step 1099 
+
+Epoch 9, dev_step 1199 
+
+Epoch 9, dev_step 1299 
+
+Epoch 9, dev_step 1399 
+
+Epoch 9, dev_step 1499 
+
+Epoch 9, dev_step 1599 
+
+Epoch 9, dev_step 1699 
+
+exact_match
+ 3.6140018921475874
+f1 score
+ 10.04703113995069
+ -------------------- Epoch 10 is ongoing -------------------- 
+
+Epoch 10, train_step 99: loss : 8.1672 
+
+Epoch 10, train_step 199: loss : 7.2603 
+
+Epoch 10, train_step 299: loss : 9.0394 
+
+Epoch 10, train_step 399: loss : 7.5669 
+
+Epoch 10, train_step 499: loss : 7.2682 
+
+Epoch 10, train_step 599: loss : 6.4604 
+
+Epoch 10, train_step 699: loss : 7.0760 
+
+Epoch 10, train_step 799: loss : 7.0325 
+
+Epoch 10, train_step 899: loss : 7.6202 
+
+Epoch 10, train_step 999: loss : 9.1615 
+
+Epoch 10, train_step 1099: loss : 7.8523 
+
+Epoch 10, train_step 1199: loss : 8.2041 
+
+Epoch 10, train_step 1299: loss : 7.6358 
+
+Epoch 10, train_step 1399: loss : 8.9981 
+
+Epoch 10, train_step 1499: loss : 8.6901 
+
+Epoch 10, train_step 1599: loss : 8.3070 
+
+Epoch 10, train_step 1699: loss : 7.3474 
+
+Epoch 10, train_step 1799: loss : 7.9647 
+
+Epoch 10, train_step 1899: loss : 9.2966 
+
+Epoch 10, train_step 1999: loss : 7.6066 
+
+Epoch 10, train_step 2099: loss : 6.7888 
+
+Epoch 10, train_step 2199: loss : 7.9252 
+
+Epoch 10, train_step 2299: loss : 8.3412 
+
+Epoch 10, train_step 2399: loss : 8.5765 
+
+Epoch 10, train_step 2499: loss : 7.9239 
+
+Epoch 10, train_step 2599: loss : 8.7334 
+
+Epoch 10, train_step 2699: loss : 8.7727 
+
+Epoch 10, train_step 2799: loss : 8.6940 
+
+Epoch 10, train_step 2899: loss : 7.9114 
+
+Epoch 10, train_step 2999: loss : 8.2346 
+
+Epoch 10, train_step 3099: loss : 9.5426 
+
+Epoch 10, train_step 3199: loss : 8.6121 
+
+Epoch 10, train_step 3299: loss : 7.5554 
+
+Epoch 10, train_step 3399: loss : 7.4866 
+
+Epoch 10, train_step 3499: loss : 8.6692 
+
+Epoch 10, train_step 3599: loss : 8.5967 
+
+Epoch 10, train_step 3699: loss : 9.3029 
+
+Epoch 10, train_step 3799: loss : 7.5226 
+
+Epoch 10, train_step 3899: loss : 7.8348 
+
+Epoch 10, train_step 3999: loss : 8.7584 
+
+Epoch 10, train_step 4099: loss : 8.1219 
+
+Epoch 10, train_step 4199: loss : 9.4040 
+
+Epoch 10, train_step 4299: loss : 8.8175 
+
+Successfully saved model
+
+Epoch 10, dev_step 99 
+
+Epoch 10, dev_step 199 
+
+Epoch 10, dev_step 299 
+
+Epoch 10, dev_step 399 
+
+Epoch 10, dev_step 499 
+
+Epoch 10, dev_step 599 
+
+Epoch 10, dev_step 699 
+
+Epoch 10, dev_step 799 
+
+Epoch 10, dev_step 899 
+
+Epoch 10, dev_step 999 
+
+Epoch 10, dev_step 1099 
+
+Epoch 10, dev_step 1199 
+
+Epoch 10, dev_step 1299 
+
+Epoch 10, dev_step 1399 
+
+Epoch 10, dev_step 1499 
+
+Epoch 10, dev_step 1599 
+
+Epoch 10, dev_step 1699 
+
+exact_match
+ 3.9640491958372754
+f1 score
+ 10.348509783343696
+ -------------------- Epoch 11 is ongoing -------------------- 
+
+Epoch 11, train_step 99: loss : 8.0259 
+
+Epoch 11, train_step 199: loss : 6.9154 
+
+Epoch 11, train_step 299: loss : 8.3076 
+
+Epoch 11, train_step 399: loss : 7.5217 
+
+Epoch 11, train_step 499: loss : 7.5207 
+
+Epoch 11, train_step 599: loss : 5.6478 
+
+Epoch 11, train_step 699: loss : 5.9213 
+
+Epoch 11, train_step 799: loss : 6.7718 
+
+Epoch 11, train_step 899: loss : 7.5880 
+
+Epoch 11, train_step 999: loss : 7.9452 
+
+Epoch 11, train_step 1099: loss : 6.8137 
+
+Epoch 11, train_step 1199: loss : 7.7020 
+
+Epoch 11, train_step 1299: loss : 7.2050 
+
+Epoch 11, train_step 1399: loss : 8.1670 
+
+Epoch 11, train_step 1499: loss : 8.0717 
+
+Epoch 11, train_step 1599: loss : 8.2000 
+
+Epoch 11, train_step 1699: loss : 7.7685 
+
+Epoch 11, train_step 1799: loss : 7.9338 
+
+Epoch 11, train_step 1899: loss : 8.4626 
+
+Epoch 11, train_step 1999: loss : 7.2836 
+
+Epoch 11, train_step 2099: loss : 6.7379 
+
+Epoch 11, train_step 2199: loss : 7.9731 
+
+Epoch 11, train_step 2299: loss : 7.9245 
+
+Epoch 11, train_step 2399: loss : 7.7965 
+
+Epoch 11, train_step 2499: loss : 8.4699 
+
+Epoch 11, train_step 2599: loss : 8.7946 
+
+Epoch 11, train_step 2699: loss : 8.6488 
+
+Epoch 11, train_step 2799: loss : 8.1633 
+
+Epoch 11, train_step 2899: loss : 7.7894 
+
+Epoch 11, train_step 2999: loss : 7.4258 
+
+Epoch 11, train_step 3099: loss : 8.8334 
+
+Epoch 11, train_step 3199: loss : 8.7797 
+
+Epoch 11, train_step 3299: loss : 7.4085 
+
+Epoch 11, train_step 3399: loss : 6.8715 
+
+Epoch 11, train_step 3499: loss : 8.8838 
+
+Epoch 11, train_step 3599: loss : 7.8363 
+
+Epoch 11, train_step 3699: loss : 8.5040 
+
+Epoch 11, train_step 3799: loss : 8.2459 
+
+Epoch 11, train_step 3899: loss : 7.3402 
+
+Epoch 11, train_step 3999: loss : 8.5357 
+
+Epoch 11, train_step 4099: loss : 8.1671 
+
+Epoch 11, train_step 4199: loss : 10.0024 
+
+Epoch 11, train_step 4299: loss : 8.6315 
+
+Successfully saved model
+
+Epoch 11, dev_step 99 
+
+Epoch 11, dev_step 199 
+
+Epoch 11, dev_step 299 
+
+Epoch 11, dev_step 399 
+
+Epoch 11, dev_step 499 
+
+Epoch 11, dev_step 599 
+
+Epoch 11, dev_step 699 
+
+Epoch 11, dev_step 799 
+
+Epoch 11, dev_step 899 
+
+Epoch 11, dev_step 999 
+
+Epoch 11, dev_step 1099 
+
+Epoch 11, dev_step 1199 
+
+Epoch 11, dev_step 1299 
+
+Epoch 11, dev_step 1399 
+
+Epoch 11, dev_step 1499 
+
+Epoch 11, dev_step 1599 
+
+Epoch 11, dev_step 1699 
+
+exact_match
+ 4.484389782403028
+f1 score
+ 10.981599997078899
