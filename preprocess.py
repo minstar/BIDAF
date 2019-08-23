@@ -145,30 +145,30 @@ class Squad_Dataset():
                             answer_mismatch += 1
                             break
 
-                        self.train_data[train_idx] = dict()
-                        self.dev_data[dev_idx] = dict()
+                    self.train_data[train_idx] = dict()
+                    self.dev_data[dev_idx] = dict()
 
-                        # --------------- make question and answer pair --------------- #
-                        if 'train' in self.config.mode:
+                    # --------------- make question and answer pair --------------- #
+                    if 'train' in self.config.mode:
 
-                            self.train_data[train_idx]['question'] = question_list  # make train data with question index
-                            self.train_data[train_idx]['context'] = context_list    # make train data with context index
-                            self.train_data[train_idx]['question_char'] = question_char_list
-                            self.train_data[train_idx]['context_char'] = context_char_list
-                            self.train_data[train_idx]['answer_start'] = answer_start
-                            self.train_data[train_idx]['answer_stop'] = answer_stop
-                            self.train_data[train_idx]['id'] = qa_id
-                            train_idx += 1
+                        self.train_data[train_idx]['question'] = question_list  # make train data with question index
+                        self.train_data[train_idx]['context'] = context_list    # make train data with context index
+                        self.train_data[train_idx]['question_char'] = question_char_list
+                        self.train_data[train_idx]['context_char'] = context_char_list
+                        self.train_data[train_idx]['answer_start'] = answer_start
+                        self.train_data[train_idx]['answer_stop'] = answer_stop
+                        self.train_data[train_idx]['id'] = qa_id
+                        train_idx += 1
 
-                        elif 'dev' in self.config.mode:
-                            self.dev_data[dev_idx]['question'] = question_list  # make train data with question index
-                            self.dev_data[dev_idx]['context'] = context_list    # make train data with context index
-                            self.dev_data[dev_idx]['question_char'] = question_char_list
-                            self.dev_data[dev_idx]['context_char'] = context_char_list
-                            self.dev_data[dev_idx]['answer_start'] = answer_start
-                            self.dev_data[dev_idx]['answer_stop'] = answer_stop
-                            self.dev_data[dev_idx]['id'] = qa_id
-                            dev_idx += 1
+                    elif 'dev' in self.config.mode:
+                        self.dev_data[dev_idx]['question'] = question_list  # make train data with question index
+                        self.dev_data[dev_idx]['context'] = context_list    # make train data with context index
+                        self.dev_data[dev_idx]['question_char'] = question_char_list
+                        self.dev_data[dev_idx]['context_char'] = context_char_list
+                        self.dev_data[dev_idx]['answer_start'] = answer_start
+                        self.dev_data[dev_idx]['answer_stop'] = answer_stop
+                        self.dev_data[dev_idx]['id'] = qa_id
+                        dev_idx += 1
 
         print ("answer mismatch number",  answer_mismatch)
 
